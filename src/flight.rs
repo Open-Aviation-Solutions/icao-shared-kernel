@@ -11,9 +11,7 @@ use uuid::Uuid;
 use crate::error::DomainError;
 use waypoint::Waypoint;
 
-// Serialise dates/times in the ISO-like shapes Pydantic emits, so the JSON wire
-// form stays close to the Python kernel. The exact UUID/date representation is
-// an open question in task 0014; these are the pragmatic defaults for the spike.
+// Serialise dates/times in ISO-8601 (`YYYY-MM-DD`, `HH:MM:SS`) on the JSON wire.
 time::serde::format_description!(date_format, Date, "[year]-[month]-[day]");
 time::serde::format_description!(time_format, Time, "[hour]:[minute]:[second]");
 

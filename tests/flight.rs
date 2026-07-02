@@ -1,6 +1,7 @@
-//! Flight parity — mirrors `tests/models/flight/test_flight.py`.
+//! Flight aggregate construction, rendering, and serialisation.
 
 use icao_shared_kernel::Flight;
+use rstest::rstest;
 use time::macros::date;
 use uuid::Uuid;
 
@@ -23,10 +24,11 @@ fn display_renders_date_and_route() {
     assert_eq!(flight.to_string(), "Flight 2026-04-19: YSBK-YSCN");
 }
 
-#[test]
-fn invalid_waypoints_rejected() {
-    assert!(Flight::create(Uuid::new_v4(), date!(2026 - 04 - 19), "ybth", "YSCN").is_err());
-    assert!(Flight::create(Uuid::new_v4(), date!(2026 - 04 - 19), "YSBK", "YS-BK").is_err());
+#[rstest]
+#[case("ybth", "YSCN")] // invalid start waypoint
+#[case("YSBK", "YS-BK")] // invalid end waypoint
+fn invalid_waypoints_rejected(#[case] start: &str, #[case] end: &str) {
+    assert!(Flight::create(Uuid::new_v4(), date!(2026 - 04 - 19), start, end).is_err());
 }
 
 #[test]

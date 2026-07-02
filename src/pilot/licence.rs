@@ -43,7 +43,13 @@ impl Licence {
     }
 }
 
-/// Serde shadow used to validate a licence on deserialisation.
+// `Licence` keeps its fields private so the only way to build one is through
+// `new`, which enforces the length bounds. Serde's derived `Deserialize` would
+// bypass that constructor and populate the fields directly, letting invalid
+// values in from JSON. `LicenceData` is a plain, unchecked mirror of the wire
+// shape: serde deserialises into it, then `try_from` funnels it through `new`
+// so a deserialised licence is validated exactly like a hand-built one. The
+// reverse `From` provides the serialise direction.
 #[derive(Serialize, Deserialize)]
 struct LicenceData {
     issuing_authority: String,

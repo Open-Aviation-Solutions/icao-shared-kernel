@@ -59,7 +59,10 @@ impl Pilot {
     }
 }
 
-/// Serde shadow: supplies the id default factory and validates on deserialise.
+// Unchecked mirror of the wire shape, for the same reason as the value-object
+// shadows: serde deserialises into `PilotData`, then `try_from` funnels it
+// through `with` so a deserialised pilot is validated exactly like a hand-built
+// one. It also supplies the `id` default factory when the field is absent.
 #[derive(Serialize, Deserialize)]
 struct PilotData {
     #[serde(default = "Uuid::new_v4")]

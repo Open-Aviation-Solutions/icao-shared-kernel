@@ -1,6 +1,7 @@
-//! Aircraft parity — mirrors `tests/models/test_aircraft.py`.
+//! Aircraft type, registration, and aggregate behaviour.
 
 use icao_shared_kernel::{Aircraft, AircraftRegistration, AircraftType};
+use rstest::rstest;
 
 #[test]
 fn registration_renders_and_exposes_marks() {
@@ -17,28 +18,26 @@ fn aircraft_creation_and_display() {
     assert_eq!(aircraft.to_string(), "C172 VH-XYZ");
 }
 
-#[test]
-fn zzzz_sentinel_accepted() {
-    assert_eq!(AircraftType::parse("ZZZZ").unwrap().as_str(), "ZZZZ");
+#[rstest]
+#[case("C172")]
+#[case("B738")]
+#[case("R44")]
+#[case("ZZZZ")] // sentinel for an unassigned designator
+fn valid_designators_accepted(#[case] value: &str) {
+    let designator = AircraftType::parse(value).expect("should be valid");
+    assert_eq!(designator.as_str(), value);
 }
 
-#[test]
-fn valid_designators_accepted() {
-    for value in ["C172", "B738", "R44", "ZZZZ"] {
-        assert!(
-            AircraftType::parse(value).is_ok(),
-            "{value:?} should be valid"
-        );
-    }
-}
-
-#[test]
-fn invalid_designators_rejected() {
-    // empty, single char, >4 chars, no leading letter, lowercase, hyphen
-    for value in ["", "C", "C1729", "172", "c172", "C-72"] {
-        assert!(
-            AircraftType::parse(value).is_err(),
-            "{value:?} should be rejected"
-        );
-    }
+#[rstest]
+#[case("")] // empty
+#[case("C")] // single char
+#[case("C1729")] // too long
+#[case("172")] // no leading letter
+#[case("c172")] // lowercase
+#[case("C-72")] // non-alphanumeric
+fn invalid_designators_rejected(#[case] value: &str) {
+    assert!(
+        AircraftType::parse(value).is_err(),
+        "{value:?} should be rejected"
+    );
 }

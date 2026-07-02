@@ -1,8 +1,10 @@
 //! The `Aircraft` aggregate root and its value objects.
 
+mod aircraft_type;
 mod registration;
 
-pub use registration::{AircraftRegistration, AircraftType};
+pub use aircraft_type::AircraftType;
+pub use registration::AircraftRegistration;
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;

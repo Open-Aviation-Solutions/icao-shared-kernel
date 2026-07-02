@@ -3,8 +3,8 @@
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
-/// Flight duration in whole minutes. Serialises as a plain integer, matching
-/// the Python `FlightTime(int)` newtype.
+/// Flight duration in whole minutes. Serialises transparently as a plain
+/// integer.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct FlightTime(i64);

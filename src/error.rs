@@ -1,12 +1,9 @@
 //! The single domain error type shared by every value-object constructor.
 //!
-//! This is the Rust analogue of the typed `variant` the Python kernel raises
-//! via Pydantic — one variant per rule, never a stringly-typed error. The
-//! waypoint messages match the Python `validate_waypoint_code` strings exactly
-//! (that validator is our own code, asserted on in the pytest suite); the other
-//! variants use their own clear messages, since the equivalent Python messages
-//! are Pydantic framework strings and matching them byte-for-byte would be
-//! brittle. The parity bar for those is *behavioural*: reject the same inputs.
+//! One typed variant per validation rule, never a stringly-typed error. The
+//! waypoint variants carry the domain's canonical, user-facing messages; the
+//! length-bound variant is fully structured (`field`, `min`, `max`, `actual`)
+//! so callers can render or match on it however they need.
 
 use thiserror::Error;
 
