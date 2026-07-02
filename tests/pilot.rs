@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 #[test]
 fn pilot_creation() {
-    let licence = Licence::new("CASA", "12345").unwrap();
+    let licence = Licence::new("AU", "CASA", "12345").unwrap();
     let pilot = Pilot::with(Uuid::new_v4(), "John Smith", None, vec![licence.clone()]).unwrap();
     assert_eq!(pilot.display_name(), "John Smith");
     assert_eq!(pilot.licences, vec![licence]);
@@ -26,17 +26,17 @@ fn holds_multiple_state_licences() {
         "Amelia",
         None,
         vec![
-            Licence::new("CASA", "CASA-1").unwrap(),
-            Licence::new("FAA", "FAA-2").unwrap(),
+            Licence::new("AU", "CASA", "CASA-1").unwrap(),
+            Licence::new("US", "FAA", "FAA-2").unwrap(),
         ],
     )
     .unwrap();
     let authorities: Vec<_> = pilot
         .licences
         .iter()
-        .map(|licence| licence.issuing_authority())
+        .map(|licence| (licence.issuing_state(), licence.issuing_authority()))
         .collect();
-    assert_eq!(authorities, ["CASA", "FAA"]);
+    assert_eq!(authorities, [("AU", "CASA"), ("US", "FAA")]);
 }
 
 #[test]
@@ -53,16 +53,38 @@ fn with_legal_name() {
 }
 
 #[test]
-fn licence_number_is_a_string() {
-    let licence = Licence::new("EASA", "UK.FCL.0A1B2").unwrap();
+fn licence_number_is_an_alphanumeric_string() {
+    // EASA-style identifiers embed a country prefix and letters.
+    let licence = Licence::new("GB", "UK CAA", "UK.FCL.0A1B2").unwrap();
     assert_eq!(licence.number(), "UK.FCL.0A1B2");
 }
 
+#[test]
+fn licence_number_has_no_upper_length_bound() {
+    // ICAO Annex 1 sets no maximum; only non-emptiness is enforced.
+    let long_number = "1".repeat(200);
+    assert!(Licence::new("AU", "CASA", &long_number).is_ok());
+}
+
 #[rstest]
-#[case("", "12345")] // empty authority
-#[case("CASA", "")] // empty number
-fn licence_validation_rejects_empty_fields(#[case] authority: &str, #[case] number: &str) {
-    assert!(Licence::new(authority, number).is_err());
+#[case("AU", "", "12345")] // empty authority
+#[case("AU", "CASA", "")] // empty number
+fn licence_validation_rejects_empty_fields(
+    #[case] state: &str,
+    #[case] authority: &str,
+    #[case] number: &str,
+) {
+    assert!(Licence::new(state, authority, number).is_err());
+}
+
+#[rstest]
+#[case("australia")] // not a code
+#[case("aus")] // three letters
+#[case("A")] // one letter
+#[case("au")] // lowercase
+#[case("")] // empty
+fn licence_validation_rejects_bad_issuing_state(#[case] state: &str) {
+    assert!(Licence::new(state, "CASA", "12345").is_err());
 }
 
 #[rstest]

@@ -1,22 +1,21 @@
 # icao-shared-kernel-rs
 
-A native Rust port of the **pure domain** of the
-[`icao-shared-kernel`](../aviation-core) Python package: validated value
-objects and aggregate roots, with their invariants and derived values.
+The **pure domain** of the `icao-shared-kernel`: validated value objects and
+aggregate roots, with their invariants and derived values.
 
-This crate exists to execute the higher-value, lower-risk half of
-`aviation-core` task `0014-rust-wasm-portable-domain-core.md`: making Rust the
-**single source of truth** for kernel validation. It is the *native-Rust spike*
-— **no WASM, no language bindings yet**. Its job is to prove validation parity
-against the existing Python pytest suite before any binding or distribution
-decision is made.
+This crate is the active design surface for the kernel and the intended single
+source of truth for domain validation, per `aviation-core` task
+`0014-rust-wasm-portable-domain-core.md`. The older Python `icao-shared-kernel`
+package is unpublished and no longer kept in lockstep — the domain is evolved
+here. No WASM and no language bindings yet; those are later steps in task 0014.
 
 ## What is (and isn't) here
 
-Ported (the trust-critical, portable part):
+Domain types:
 
-- Value objects: `Waypoint`, `FlightTime`, `AircraftType`,
-  `AircraftRegistration`, `Licence`.
+- Value objects: `Waypoint`, `Coordinate`, `SignificantPoint` (a route/flight
+  path point — a coded designator *or* a lat/long coordinate), `FlightDuration`,
+  `AircraftType`, `AircraftRegistration`, `Licence`.
 - Aggregate roots: `Flight`, `Aircraft`, `Pilot`.
 - The public `validate_waypoint_code` function.
 
@@ -32,13 +31,15 @@ Value objects follow *parse, don't validate*: each has a fallible smart
 constructor (`Waypoint::parse`, `Licence::new`, …) returning
 `Result<Self, DomainError>`, and once constructed is guaranteed valid. The
 aggregates therefore hold already-typed fields and cannot represent an invalid
-state. `DomainError` is a single typed enum — the Rust analogue of the typed
-errors Pydantic raises.
+state. `DomainError` is a single typed enum, one variant per validation rule.
 
-The waypoint error messages match the Python `validate_waypoint_code` strings
-exactly (that validator is our own code, asserted on in the pytest suite). The
-other rules are matched *behaviourally* — they reject the same inputs — rather
-than reproducing Pydantic's framework message strings.
+`Flight` is a thin hub: which aircraft flew, the `departure` and `arrival`
+significant points, and the optional `first_movement` / `last_movement` UTC
+timestamps (movement under own power). Block time is a derived `duration()`,
+computed from those timestamps when both are present rather than stored.
+
+Each validation rule is justified against a regulatory source (ICAO Annex,
+CASA Part 61) and covered by a test under `tests/`.
 
 ## Development
 
@@ -47,14 +48,6 @@ Requires a Rust toolchain and a C linker (`build-essential` on Debian/Ubuntu).
 ```sh
 make help       # list targets
 make dev        # build
-make test       # run the parity test suite
+make test       # run the test suite
 make check-all  # clippy + fmt check + tests
 ```
-
-## Parity contract
-
-The Python pytest suite under `aviation-core/tests/models/` is the reference
-spec. Every behaviour it asserts has an equivalent test under `tests/` here.
-One faithful subtlety worth noting: a waypoint with no letters (e.g. `12345`)
-is rejected, because the Python validator uses `str.isupper()`, which is `False`
-for an all-digit string.

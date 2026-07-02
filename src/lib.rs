@@ -20,7 +20,9 @@ pub mod pilot;
 
 pub use aircraft::{Aircraft, AircraftRegistration, AircraftType};
 pub use error::DomainError;
-pub use flight::flight_time::FlightTime;
+pub use flight::coordinate::Coordinate;
+pub use flight::flight_duration::FlightDuration;
+pub use flight::significant_point::SignificantPoint;
 pub use flight::waypoint::{validate_waypoint_code, Waypoint};
 pub use flight::Flight;
 pub use pilot::{Licence, Pilot};
