@@ -2,6 +2,18 @@
 
 use icao_shared_kernel::{Aircraft, AircraftRegistration, AircraftType};
 use rstest::rstest;
+use uuid::Uuid;
+
+#[test]
+fn with_preserves_explicit_id() {
+    let id = Uuid::new_v4();
+    let aircraft = Aircraft::with(
+        id,
+        AircraftType::parse("C172").unwrap(),
+        AircraftRegistration::new("VH", "XYZ").unwrap(),
+    );
+    assert_eq!(aircraft.id, id);
+}
 
 #[test]
 fn registration_renders_and_exposes_marks() {

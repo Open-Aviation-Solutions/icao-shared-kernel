@@ -42,8 +42,30 @@ impl Flight {
         first_movement: Option<UtcDateTime>,
         last_movement: Option<UtcDateTime>,
     ) -> Self {
+        Self::with(
+            Uuid::new_v4(),
+            aircraft_id,
+            departure,
+            arrival,
+            first_movement,
+            last_movement,
+        )
+    }
+
+    /// Build a flight from already-validated parts with an explicit id — for
+    /// rehydrating a previously persisted flight, where [`new`](Self::new)
+    /// would mint a different id than the one it was stored under.
+    #[allow(clippy::too_many_arguments)]
+    pub fn with(
+        id: Uuid,
+        aircraft_id: Uuid,
+        departure: SignificantPoint,
+        arrival: SignificantPoint,
+        first_movement: Option<UtcDateTime>,
+        last_movement: Option<UtcDateTime>,
+    ) -> Self {
         Self {
-            id: Uuid::new_v4(),
+            id,
             aircraft_id,
             departure,
             arrival,

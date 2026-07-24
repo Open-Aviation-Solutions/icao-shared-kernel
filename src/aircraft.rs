@@ -26,8 +26,15 @@ pub struct Aircraft {
 impl Aircraft {
     /// Build an aircraft from already-validated parts, assigning a fresh id.
     pub fn new(aircraft_type: AircraftType, registration: AircraftRegistration) -> Self {
+        Self::with(Uuid::new_v4(), aircraft_type, registration)
+    }
+
+    /// Build an aircraft from already-validated parts with an explicit id —
+    /// for rehydrating a previously persisted aircraft, where [`new`](Self::new)
+    /// would mint a different id than the one it was stored under.
+    pub fn with(id: Uuid, aircraft_type: AircraftType, registration: AircraftRegistration) -> Self {
         Self {
-            id: Uuid::new_v4(),
+            id,
             aircraft_type,
             registration,
         }
