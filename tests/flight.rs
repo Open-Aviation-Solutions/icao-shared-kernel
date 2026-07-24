@@ -77,6 +77,20 @@ fn coordinate_endpoint_supported() {
 }
 
 #[test]
+fn with_preserves_explicit_id() {
+    let id = Uuid::new_v4();
+    let flight = Flight::with(
+        id,
+        Uuid::new_v4(),
+        SignificantPoint::designator("YSBK").unwrap(),
+        SignificantPoint::designator("YSCN").unwrap(),
+        None,
+        None,
+    );
+    assert_eq!(flight.id, id);
+}
+
+#[test]
 fn json_round_trip_preserves_value() {
     let flight = Flight::new(
         Uuid::new_v4(),
