@@ -2,7 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::error::DomainError;
+use crate::error::ValidationError;
 
 /// An ICAO Doc 8643 aircraft type designator (e.g. `C172`, `B738`, `R44`).
 ///
@@ -15,7 +15,7 @@ pub struct AircraftType(String);
 impl AircraftType {
     /// Parse and validate a type designator: 2–4 characters, a leading letter
     /// followed by letters or digits.
-    pub fn parse(value: impl Into<String>) -> Result<Self, DomainError> {
+    pub fn parse(value: impl Into<String>) -> Result<Self, ValidationError> {
         let value = value.into();
         let len = value.chars().count();
         let leads_with_letter = value.chars().next().is_some_and(|c| c.is_ascii_uppercase());
@@ -23,7 +23,7 @@ impl AircraftType {
             .chars()
             .all(|c| c.is_ascii_uppercase() || c.is_ascii_digit());
         if !(2..=4).contains(&len) || !leads_with_letter || !rest_alnum_upper {
-            return Err(DomainError::AircraftType(value));
+            return Err(ValidationError::AircraftType(value));
         }
         Ok(Self(value))
     }
@@ -41,7 +41,7 @@ impl std::fmt::Display for AircraftType {
 }
 
 impl TryFrom<String> for AircraftType {
-    type Error = DomainError;
+    type Error = ValidationError;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
         Self::parse(value)

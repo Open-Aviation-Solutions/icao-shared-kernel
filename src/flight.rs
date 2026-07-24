@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use time::UtcDateTime;
 use uuid::Uuid;
 
-use crate::error::DomainError;
+use crate::error::ValidationError;
 use flight_duration::FlightDuration;
 use significant_point::SignificantPoint;
 
@@ -54,7 +54,7 @@ impl Flight {
 
     /// Convenience constructor from coded designator strings, validating them
     /// and assigning a fresh id with no movement times recorded.
-    pub fn create(aircraft_id: Uuid, departure: &str, arrival: &str) -> Result<Self, DomainError> {
+    pub fn create(aircraft_id: Uuid, departure: &str, arrival: &str) -> Result<Self, ValidationError> {
         Ok(Self::new(
             aircraft_id,
             SignificantPoint::designator(departure)?,

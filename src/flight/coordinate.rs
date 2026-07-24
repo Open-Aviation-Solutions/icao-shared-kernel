@@ -3,7 +3,7 @@
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
-use crate::error::{check_coordinate_ranges, DomainError};
+use crate::error::{check_coordinate_ranges, ValidationError};
 
 /// A latitude/longitude position in decimal degrees.
 ///
@@ -18,7 +18,7 @@ pub struct Coordinate {
 
 impl Coordinate {
     /// Build a coordinate, validating both components are in range.
-    pub fn new(latitude: Decimal, longitude: Decimal) -> Result<Self, DomainError> {
+    pub fn new(latitude: Decimal, longitude: Decimal) -> Result<Self, ValidationError> {
         check_coordinate_ranges(latitude, longitude)?;
         Ok(Self {
             latitude,
@@ -52,7 +52,7 @@ struct CoordinateData {
 }
 
 impl TryFrom<CoordinateData> for Coordinate {
-    type Error = DomainError;
+    type Error = ValidationError;
 
     fn try_from(data: CoordinateData) -> Result<Self, Self::Error> {
         Self::new(data.latitude, data.longitude)

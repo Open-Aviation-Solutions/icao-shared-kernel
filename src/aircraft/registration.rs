@@ -2,7 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::error::{check_length, DomainError};
+use crate::error::{check_length, ValidationError};
 
 /// Aircraft nationality and registration marks (ICAO Annex 7).
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -17,7 +17,7 @@ impl AircraftRegistration {
     pub fn new(
         nationality: impl Into<String>,
         registration: impl Into<String>,
-    ) -> Result<Self, DomainError> {
+    ) -> Result<Self, ValidationError> {
         let nationality = nationality.into();
         let registration = registration.into();
         check_length("nationality", &nationality, 1, 2)?;
@@ -59,7 +59,7 @@ struct RegistrationData {
 }
 
 impl TryFrom<RegistrationData> for AircraftRegistration {
-    type Error = DomainError;
+    type Error = ValidationError;
 
     fn try_from(data: RegistrationData) -> Result<Self, Self::Error> {
         Self::new(data.nationality, data.registration)

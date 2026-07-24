@@ -42,7 +42,7 @@ test alongside it and record the regulatory basis in the doc comment.
 - **No vendored ICAO-copyrighted data** — only validation *rules* (facts) are
   ported, consistent with `aviation-core` task 0012.
 - Value objects use *parse, don't validate*: a fallible smart constructor
-  returning `Result<Self, DomainError>`; no public way to build an invalid value.
+  returning `Result<Self, ValidationError>`; no public way to build an invalid value.
 - Module layout: each aggregate is a module file (`flight.rs`) with a sibling
   directory of the same name holding its value-object submodules
   (`flight/waypoint.rs`, `flight/coordinate.rs`, `flight/significant_point.rs`,

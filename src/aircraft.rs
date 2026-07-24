@@ -9,7 +9,7 @@ pub use registration::AircraftRegistration;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::error::DomainError;
+use crate::error::ValidationError;
 
 /// Aircraft reference entity with ICAO-universal identity and descriptors.
 ///
@@ -39,7 +39,7 @@ impl Aircraft {
         type_designator: &str,
         nationality: &str,
         registration: &str,
-    ) -> Result<Self, DomainError> {
+    ) -> Result<Self, ValidationError> {
         Ok(Self::new(
             AircraftType::parse(type_designator)?,
             AircraftRegistration::new(nationality, registration)?,

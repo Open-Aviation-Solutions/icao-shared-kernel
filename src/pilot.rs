@@ -7,7 +7,7 @@ pub use licence::Licence;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::error::{check_length, DomainError};
+use crate::error::{check_length, ValidationError};
 
 /// Pilot identity and the licences they hold.
 ///
@@ -24,7 +24,7 @@ pub struct Pilot {
 
 impl Pilot {
     /// Build a pilot with a fresh id, no legal name, and no licences.
-    pub fn new(display_name: impl Into<String>) -> Result<Self, DomainError> {
+    pub fn new(display_name: impl Into<String>) -> Result<Self, ValidationError> {
         Self::with(Uuid::new_v4(), display_name, None, Vec::new())
     }
 
@@ -34,7 +34,7 @@ impl Pilot {
         display_name: impl Into<String>,
         legal_name: Option<String>,
         licences: Vec<Licence>,
-    ) -> Result<Self, DomainError> {
+    ) -> Result<Self, ValidationError> {
         let display_name = display_name.into();
         check_length("display_name", &display_name, 1, 100)?;
         if let Some(ref legal_name) = legal_name {
@@ -75,7 +75,7 @@ struct PilotData {
 }
 
 impl TryFrom<PilotData> for Pilot {
-    type Error = DomainError;
+    type Error = ValidationError;
 
     fn try_from(data: PilotData) -> Result<Self, Self::Error> {
         Self::with(data.id, data.display_name, data.legal_name, data.licences)

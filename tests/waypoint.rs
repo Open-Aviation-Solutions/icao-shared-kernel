@@ -1,6 +1,6 @@
 //! Waypoint designator validation.
 
-use icao_shared_kernel::{DomainError, Waypoint};
+use icao_shared_kernel::{ValidationError, Waypoint};
 use rstest::rstest;
 
 #[rstest]
@@ -42,6 +42,6 @@ fn all_digit_code_rejected() {
     // A–Z character, not only digits.
     assert!(matches!(
         Waypoint::parse("12345"),
-        Err(DomainError::WaypointCharset(_))
+        Err(ValidationError::WaypointCharset(_))
     ));
 }

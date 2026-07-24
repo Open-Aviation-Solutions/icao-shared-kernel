@@ -2,7 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::error::DomainError;
+use crate::error::ValidationError;
 
 /// A validated waypoint designator (e.g. `YSBK`, `RIVET`, `DCT01`).
 ///
@@ -14,7 +14,7 @@ pub struct Waypoint(String);
 
 impl Waypoint {
     /// Parse and validate a waypoint designator.
-    pub fn parse(value: impl Into<String>) -> Result<Self, DomainError> {
+    pub fn parse(value: impl Into<String>) -> Result<Self, ValidationError> {
         let value = value.into();
         validate_waypoint_code(&value)?;
         Ok(Self(value))
@@ -34,17 +34,17 @@ impl Waypoint {
 /// Every character must be ASCII `A`–`Z` or `0`–`9`, and there must be at least
 /// one letter (an all-digit code is rejected). Length is checked first, so the
 /// error distinguishes the two failure modes.
-pub fn validate_waypoint_code(waypoint: &str) -> Result<(), DomainError> {
+pub fn validate_waypoint_code(waypoint: &str) -> Result<(), ValidationError> {
     let len = waypoint.chars().count();
     if !(2..=5).contains(&len) {
-        return Err(DomainError::WaypointLength(waypoint.to_string()));
+        return Err(ValidationError::WaypointLength(waypoint.to_string()));
     }
     let all_upper_alnum = waypoint
         .chars()
         .all(|c| c.is_ascii_uppercase() || c.is_ascii_digit());
     let has_letter = waypoint.chars().any(|c| c.is_ascii_uppercase());
     if !all_upper_alnum || !has_letter {
-        return Err(DomainError::WaypointCharset(waypoint.to_string()));
+        return Err(ValidationError::WaypointCharset(waypoint.to_string()));
     }
     Ok(())
 }
@@ -56,7 +56,7 @@ impl std::fmt::Display for Waypoint {
 }
 
 impl TryFrom<String> for Waypoint {
-    type Error = DomainError;
+    type Error = ValidationError;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
         Self::parse(value)

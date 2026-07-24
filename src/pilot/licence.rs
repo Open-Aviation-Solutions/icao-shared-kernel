@@ -2,7 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::error::{check_non_empty, DomainError};
+use crate::error::{check_non_empty, ValidationError};
 
 /// The ICAO-universal identity of a pilot licence (Annex 1).
 ///
@@ -32,7 +32,7 @@ impl Licence {
         issuing_state: impl Into<String>,
         issuing_authority: impl Into<String>,
         number: impl Into<String>,
-    ) -> Result<Self, DomainError> {
+    ) -> Result<Self, ValidationError> {
         let issuing_state = issuing_state.into();
         let issuing_authority = issuing_authority.into();
         let number = number.into();
@@ -65,10 +65,10 @@ impl Licence {
 /// Validate an ISO 3166-1 alpha-2 code by shape: exactly two ASCII uppercase
 /// letters. Membership against the real code list is intentionally left for a
 /// later step — this checks form only.
-fn validate_issuing_state(value: &str) -> Result<(), DomainError> {
+fn validate_issuing_state(value: &str) -> Result<(), ValidationError> {
     let is_alpha2 = value.len() == 2 && value.bytes().all(|b| b.is_ascii_uppercase());
     if !is_alpha2 {
-        return Err(DomainError::IssuingState(value.to_string()));
+        return Err(ValidationError::IssuingState(value.to_string()));
     }
     Ok(())
 }
@@ -88,7 +88,7 @@ struct LicenceData {
 }
 
 impl TryFrom<LicenceData> for Licence {
-    type Error = DomainError;
+    type Error = ValidationError;
 
     fn try_from(data: LicenceData) -> Result<Self, Self::Error> {
         Self::new(data.issuing_state, data.issuing_authority, data.number)

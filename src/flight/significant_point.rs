@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use super::coordinate::Coordinate;
 use super::waypoint::Waypoint;
-use crate::error::DomainError;
+use crate::error::ValidationError;
 
 /// A specified geographical location used to define an ATS route or an
 /// aircraft's flight path (ICAO "significant point").
@@ -24,7 +24,7 @@ pub enum SignificantPoint {
 
 impl SignificantPoint {
     /// Parse a coded designator into a significant point.
-    pub fn designator(value: impl Into<String>) -> Result<Self, DomainError> {
+    pub fn designator(value: impl Into<String>) -> Result<Self, ValidationError> {
         Ok(Self::Designator(Waypoint::parse(value)?))
     }
 }

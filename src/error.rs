@@ -10,7 +10,7 @@ use thiserror::Error;
 
 /// Every way a domain value object can fail to validate.
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
-pub enum DomainError {
+pub enum ValidationError {
     /// Waypoint designator outside the 2–5 character range.
     #[error("Waypoint '{0}' must be 2-5 characters long")]
     WaypointLength(String),
@@ -60,10 +60,10 @@ pub(crate) fn check_length(
     value: &str,
     min: usize,
     max: usize,
-) -> Result<(), DomainError> {
+) -> Result<(), ValidationError> {
     let actual = value.chars().count();
     if actual < min || actual > max {
-        return Err(DomainError::FieldLength {
+        return Err(ValidationError::FieldLength {
             field,
             min,
             max,
@@ -74,9 +74,9 @@ pub(crate) fn check_length(
 }
 
 /// Require a string field to be non-empty, with no upper bound on its length.
-pub(crate) fn check_non_empty(field: &'static str, value: &str) -> Result<(), DomainError> {
+pub(crate) fn check_non_empty(field: &'static str, value: &str) -> Result<(), ValidationError> {
     if value.is_empty() {
-        return Err(DomainError::Empty { field });
+        return Err(ValidationError::Empty { field });
     }
     Ok(())
 }
@@ -85,12 +85,12 @@ pub(crate) fn check_non_empty(field: &'static str, value: &str) -> Result<(), Do
 pub(crate) fn check_coordinate_ranges(
     latitude: Decimal,
     longitude: Decimal,
-) -> Result<(), DomainError> {
+) -> Result<(), ValidationError> {
     if latitude < Decimal::from(-90) || latitude > Decimal::from(90) {
-        return Err(DomainError::Latitude(latitude));
+        return Err(ValidationError::Latitude(latitude));
     }
     if longitude < Decimal::from(-180) || longitude > Decimal::from(180) {
-        return Err(DomainError::Longitude(longitude));
+        return Err(ValidationError::Longitude(longitude));
     }
     Ok(())
 }

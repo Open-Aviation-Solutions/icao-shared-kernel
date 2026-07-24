@@ -9,7 +9,7 @@
 //! ## Design
 //!
 //! Value objects follow *parse, don't validate*: each has a fallible smart
-//! constructor returning [`Result`]`<Self, `[`DomainError`]`>`, and once built
+//! constructor returning [`Result`]`<Self, `[`ValidationError`]`>`, and once built
 //! is guaranteed valid. Aggregates therefore hold already-typed fields and
 //! cannot represent an invalid state.
 
@@ -19,7 +19,7 @@ pub mod flight;
 pub mod pilot;
 
 pub use aircraft::{Aircraft, AircraftRegistration, AircraftType};
-pub use error::DomainError;
+pub use error::ValidationError;
 pub use flight::coordinate::Coordinate;
 pub use flight::flight_duration::FlightDuration;
 pub use flight::significant_point::SignificantPoint;

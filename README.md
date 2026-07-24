@@ -29,9 +29,9 @@ Deliberately **out of scope** (unchanged from task 0014):
 
 Value objects follow *parse, don't validate*: each has a fallible smart
 constructor (`Waypoint::parse`, `Licence::new`, …) returning
-`Result<Self, DomainError>`, and once constructed is guaranteed valid. The
+`Result<Self, ValidationError>`, and once constructed is guaranteed valid. The
 aggregates therefore hold already-typed fields and cannot represent an invalid
-state. `DomainError` is a single typed enum, one variant per validation rule.
+state. `ValidationError` is a single typed enum, one variant per validation rule.
 
 `Flight` is a thin hub: which aircraft flew, the `departure` and `arrival`
 significant points, and the optional `first_movement` / `last_movement` UTC
