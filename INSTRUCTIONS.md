@@ -56,5 +56,5 @@ test alongside it and record the regulatory basis in the doc comment.
 make test       # cargo test — the parity suite
 make lint       # cargo clippy -- -D warnings
 make fmt        # cargo fmt
-make check-all  # lint + fmt check + test
+make check      # lint + fmt check + test
 ```

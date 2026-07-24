@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help dev build test lint fmt fmt-check check-all
+.PHONY: help dev build test lint fmt fmt-check check
 
 help: ## List available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -23,4 +23,4 @@ fmt: ## Format the code
 fmt-check: ## Check formatting without modifying files
 	cargo fmt --check
 
-check-all: lint fmt-check test ## Run all checks: lint, format check, tests
+check: lint fmt-check test ## Run all checks: lint, format check, tests

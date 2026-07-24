@@ -49,5 +49,5 @@ Requires a Rust toolchain and a C linker (`build-essential` on Debian/Ubuntu).
 make help       # list targets
 make dev        # build
 make test       # run the test suite
-make check-all  # clippy + fmt check + tests
+make check      # clippy + fmt check + tests
 ```
