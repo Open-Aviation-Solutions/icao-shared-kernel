@@ -1,0 +1,26 @@
+[package]
+name = "icao-shared-kernel"
+version = "0.1.0"
+edition = "2021"
+description = "Rust port of the ICAO shared-kernel pure domain: validated value objects and aggregate roots. Intended as the eventual single source of truth for kernel validation (see aviation-core task 0014)."
+publish = false
+
+[lib]
+name = "icao_shared_kernel"
+path = "src/lib.rs"
+
+[dependencies]
+uuid = { version = "1", features = ["v4", "serde"] }
+time = { version = "0.3", features = ["macros", "serde", "formatting", "parsing"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+rust_decimal = { version = "1", features = ["serde"] }
+
+[dev-dependencies]
+uuid = { version = "1", features = ["v4"] }
+time = { version = "0.3", features = ["macros"] }
+serde_json = "1"
+rust_decimal = "1"
+rust_decimal_macros = "1"
+rstest = "0.23"
