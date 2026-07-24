@@ -54,7 +54,11 @@ impl Flight {
 
     /// Convenience constructor from coded designator strings, validating them
     /// and assigning a fresh id with no movement times recorded.
-    pub fn create(aircraft_id: Uuid, departure: &str, arrival: &str) -> Result<Self, ValidationError> {
+    pub fn create(
+        aircraft_id: Uuid,
+        departure: &str,
+        arrival: &str,
+    ) -> Result<Self, ValidationError> {
         Ok(Self::new(
             aircraft_id,
             SignificantPoint::designator(departure)?,
