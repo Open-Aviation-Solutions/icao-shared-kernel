@@ -1,8 +1,9 @@
 //! The `icao-shared-kernel` pure domain.
 //!
 //! This crate holds the trust-critical core of the kernel — the value objects
-//! and aggregate roots (`Aircraft`, `Pilot`, `Flight`), with their validation
-//! invariants and derived values. It deliberately does **not** include the
+//! and aggregate roots (`Aircraft`, `Pilot`, `Flight`, and the
+//! `FlightSimulationTrainingDevice` / `FstdSession` pair), with their
+//! validation invariants and derived values. It deliberately does **not** include the
 //! repository protocols (async I/O) or any infrastructure adapters; those stay
 //! host-side per consumer.
 //!
@@ -16,6 +17,8 @@
 pub mod aircraft;
 pub mod error;
 pub mod flight;
+pub mod fstd;
+pub mod fstd_session;
 pub mod pilot;
 
 pub use aircraft::{Aircraft, AircraftRegistration, AircraftType};
@@ -25,4 +28,6 @@ pub use flight::flight_duration::FlightDuration;
 pub use flight::significant_point::SignificantPoint;
 pub use flight::waypoint::{validate_waypoint_code, Waypoint};
 pub use flight::Flight;
+pub use fstd::{DeviceDesignation, DeviceQualification, FlightSimulationTrainingDevice, FstdKind};
+pub use fstd_session::FstdSession;
 pub use pilot::{Licence, Pilot};
