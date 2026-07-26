@@ -2,7 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::error::{check_non_empty, ValidationError};
+use crate::error::{check_issuing_state, check_non_empty, ValidationError};
 
 /// The ICAO-universal identity of a pilot licence (Annex 1).
 ///
@@ -36,7 +36,7 @@ impl Licence {
         let issuing_state = issuing_state.into();
         let issuing_authority = issuing_authority.into();
         let number = number.into();
-        validate_issuing_state(&issuing_state)?;
+        check_issuing_state(&issuing_state)?;
         check_non_empty("issuing_authority", &issuing_authority)?;
         check_non_empty("number", &number)?;
         Ok(Self {
@@ -60,17 +60,6 @@ impl Licence {
     pub fn number(&self) -> &str {
         &self.number
     }
-}
-
-/// Validate an ISO 3166-1 alpha-2 code by shape: exactly two ASCII uppercase
-/// letters. Membership against the real code list is intentionally left for a
-/// later step — this checks form only.
-fn validate_issuing_state(value: &str) -> Result<(), ValidationError> {
-    let is_alpha2 = value.len() == 2 && value.bytes().all(|b| b.is_ascii_uppercase());
-    if !is_alpha2 {
-        return Err(ValidationError::IssuingState(value.to_string()));
-    }
-    Ok(())
 }
 
 // `Licence` keeps its fields private so the only way to build one is through

@@ -7,6 +7,7 @@
 
 use rust_decimal::Decimal;
 use thiserror::Error;
+use time::Date;
 
 /// Every way a domain value object can fail to validate.
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
@@ -43,6 +44,10 @@ pub enum ValidationError {
     #[error("issuing_state '{0}' must be a two-letter ISO 3166-1 alpha-2 code")]
     IssuingState(String),
 
+    /// A validity period whose end date precedes its start date.
+    #[error("valid_until {until} must not precede valid_from {from}")]
+    ValidityPeriod { from: Date, until: Date },
+
     /// A latitude outside the valid −90..=90 degree range.
     #[error("latitude {0} is out of range (must be -90..=90 degrees)")]
     Latitude(Decimal),
@@ -77,6 +82,25 @@ pub(crate) fn check_length(
 pub(crate) fn check_non_empty(field: &'static str, value: &str) -> Result<(), ValidationError> {
     if value.is_empty() {
         return Err(ValidationError::Empty { field });
+    }
+    Ok(())
+}
+
+/// Validate an ISO 3166-1 alpha-2 code by shape: exactly two ASCII uppercase
+/// letters. Membership against the real code list is intentionally left for a
+/// later step — this checks form only.
+pub(crate) fn check_issuing_state(value: &str) -> Result<(), ValidationError> {
+    let is_alpha2 = value.len() == 2 && value.bytes().all(|b| b.is_ascii_uppercase());
+    if !is_alpha2 {
+        return Err(ValidationError::IssuingState(value.to_string()));
+    }
+    Ok(())
+}
+
+/// Require a validity period's end date not to precede its start date.
+pub(crate) fn check_validity_period(from: Date, until: Date) -> Result<(), ValidationError> {
+    if until < from {
+        return Err(ValidationError::ValidityPeriod { from, until });
     }
     Ok(())
 }
