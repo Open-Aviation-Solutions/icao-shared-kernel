@@ -3,6 +3,7 @@
 
 pub mod coordinate;
 pub mod flight_duration;
+pub mod flight_rules;
 pub mod significant_point;
 pub mod waypoint;
 
@@ -12,6 +13,7 @@ use uuid::Uuid;
 
 use crate::error::ValidationError;
 use flight_duration::FlightDuration;
+use flight_rules::FlightRules;
 use significant_point::SignificantPoint;
 
 /// Shared record identifying a physical flight event.
@@ -23,6 +25,9 @@ use significant_point::SignificantPoint;
 ///
 /// `first_movement` and `last_movement` are optional because the route (the
 /// departure and arrival points) is often known before the movement times are.
+/// `flight_rules` is optional because a record may not say: it is never
+/// inferred from anything else. The constructors leave it unrecorded; set it
+/// with [`with_flight_rules`](Self::with_flight_rules).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Flight {
     pub id: Uuid,
@@ -31,6 +36,8 @@ pub struct Flight {
     pub arrival: SignificantPoint,
     pub first_movement: Option<UtcDateTime>,
     pub last_movement: Option<UtcDateTime>,
+    /// The flight rules it was flown under, if recorded.
+    pub flight_rules: Option<FlightRules>,
 }
 
 impl Flight {
@@ -71,6 +78,15 @@ impl Flight {
             arrival,
             first_movement,
             last_movement,
+            flight_rules: None,
+        }
+    }
+
+    /// The same flight, flown under `flight_rules` (`None`: not recorded).
+    pub fn with_flight_rules(self, flight_rules: Option<FlightRules>) -> Self {
+        Self {
+            flight_rules,
+            ..self
         }
     }
 

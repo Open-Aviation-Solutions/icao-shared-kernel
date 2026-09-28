@@ -1,6 +1,6 @@
 //! FSTD session route, duration, and the per-session simulated type.
 
-use icao_shared_kernel::{AircraftType, FstdSession, SignificantPoint};
+use icao_shared_kernel::{AircraftType, FlightRules, FstdSession, SignificantPoint};
 use time::macros::utc_datetime;
 use uuid::Uuid;
 
@@ -113,8 +113,18 @@ fn session_round_trips_through_json() {
         Some(point("YSCN")),
         Some(utc_datetime!(2026-05-01 01:00)),
         Some(utc_datetime!(2026-05-01 02:00)),
-    );
+    )
+    .with_flight_rules(Some(FlightRules::Ifr));
     let json = serde_json::to_string(&session).unwrap();
     let parsed: FstdSession = serde_json::from_str(&json).unwrap();
     assert_eq!(parsed, session);
+}
+
+#[test]
+fn a_session_recorded_without_flight_rules_reads_as_none() {
+    let session = FstdSession::create(Uuid::new_v4(), "C172").unwrap();
+    let mut json = serde_json::to_value(&session).unwrap();
+    json.as_object_mut().unwrap().remove("flight_rules");
+    let back: FstdSession = serde_json::from_value(json).unwrap();
+    assert_eq!(back.flight_rules, None);
 }

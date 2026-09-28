@@ -8,6 +8,7 @@ use uuid::Uuid;
 use crate::aircraft::AircraftType;
 use crate::error::ValidationError;
 use crate::flight::flight_duration::FlightDuration;
+use crate::flight::flight_rules::FlightRules;
 use crate::flight::significant_point::SignificantPoint;
 
 /// Shared record identifying a session flown on a
@@ -44,6 +45,11 @@ pub struct FstdSession {
     pub arrival: Option<SignificantPoint>,
     pub start: Option<UtcDateTime>,
     pub end: Option<UtcDateTime>,
+    /// The flight rules the simulated flight was flown under, if recorded: a
+    /// session simulates a flight under the IFR or the VFR as a flight is
+    /// flown under them. The constructors leave it unrecorded; set it with
+    /// [`with_flight_rules`](Self::with_flight_rules).
+    pub flight_rules: Option<FlightRules>,
 }
 
 impl FstdSession {
@@ -88,6 +94,15 @@ impl FstdSession {
             arrival,
             start,
             end,
+            flight_rules: None,
+        }
+    }
+
+    /// The same session, flown under `flight_rules` (`None`: not recorded).
+    pub fn with_flight_rules(self, flight_rules: Option<FlightRules>) -> Self {
+        Self {
+            flight_rules,
+            ..self
         }
     }
 

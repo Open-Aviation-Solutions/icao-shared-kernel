@@ -38,7 +38,9 @@ test alongside it and record the regulatory basis in the doc comment.
 - **Discuss before implementing** non-trivial design changes, consistent with
   the `aviation-core` working style.
 - **Regulatory terms only**: names and terminology must be verifiable against
-  the same regulatory sources as the Python kernel (ICAO Annexes, CASA Part 61).
+  the same regulatory sources as the Python kernel (ICAO Annexes, CASA Part 61),
+  and the ICAO procedures they rest on (Doc 4444, PANS-ATM, for a flight plan's
+  items).
 - **No vendored ICAO-copyrighted data** — only validation *rules* (facts) are
   ported, consistent with `aviation-core` task 0012.
 - Value objects use *parse, don't validate*: a fallible smart constructor
@@ -46,11 +48,18 @@ test alongside it and record the regulatory basis in the doc comment.
 - Module layout: each aggregate is a module file (`flight.rs`) with a sibling
   directory of the same name holding its value-object submodules
   (`flight/waypoint.rs`, `flight/coordinate.rs`, `flight/significant_point.rs`,
-  `flight/flight_duration.rs`; `aircraft/aircraft_type.rs`,
+  `flight/flight_duration.rs`, `flight/flight_rules.rs`; `aircraft/aircraft_type.rs`,
   `aircraft/registration.rs`; `pilot/licence.rs`; `fstd/designation.rs`,
   `fstd/qualification.rs`). An aggregate with no value objects of its own has
   no sibling directory (`fstd_session.rs`). `lib.rs` re-exports the value
   objects so the public API stays flat.
+
+## Consumers
+
+`pilot-logbook` is the only consumer, and depends on this crate's `main` branch
+(its lockfile pins a commit). Choose the best API, not the compatible one: a
+breaking change is fine, landed with a matching `pilot-logbook` PR that updates
+its lockfile to it.
 
 ## Commands
 

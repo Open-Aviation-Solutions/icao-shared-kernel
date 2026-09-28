@@ -1,6 +1,6 @@
 //! Flight aggregate construction, rendering, derived duration, and serialisation.
 
-use icao_shared_kernel::{Coordinate, Flight, FlightDuration, SignificantPoint};
+use icao_shared_kernel::{Coordinate, Flight, FlightDuration, FlightRules, SignificantPoint};
 use rstest::rstest;
 use rust_decimal_macros::dec;
 use time::macros::utc_datetime;
@@ -98,8 +98,48 @@ fn json_round_trip_preserves_value() {
         SignificantPoint::Coordinate(Coordinate::new(dec!(-33.9461), dec!(151.1772)).unwrap()),
         Some(utc_datetime!(2026-04-19 03:00)),
         Some(utc_datetime!(2026-04-19 04:30)),
-    );
+    )
+    .with_flight_rules(Some(FlightRules::InitiallyVfr));
     let json = serde_json::to_string(&flight).unwrap();
     let back: Flight = serde_json::from_str(&json).unwrap();
     assert_eq!(back, flight);
+}
+
+#[test]
+fn flight_rules_are_unrecorded_until_set() {
+    let flight = Flight::create(Uuid::new_v4(), "YSBK", "YSCN").unwrap();
+    assert_eq!(flight.flight_rules, None);
+    let flight = flight.with_flight_rules(Some(FlightRules::Ifr));
+    assert_eq!(flight.flight_rules, Some(FlightRules::Ifr));
+}
+
+#[test]
+fn flight_rules_are_spelled_as_their_names() {
+    let spelled: Vec<String> = [
+        FlightRules::Ifr,
+        FlightRules::Vfr,
+        FlightRules::InitiallyIfr,
+        FlightRules::InitiallyVfr,
+    ]
+    .iter()
+    .map(|rules| serde_json::to_string(rules).unwrap())
+    .collect();
+    assert_eq!(
+        spelled,
+        [
+            r#""ifr""#,
+            r#""vfr""#,
+            r#""initially-ifr""#,
+            r#""initially-vfr""#
+        ]
+    );
+}
+
+#[test]
+fn a_flight_recorded_without_flight_rules_reads_as_none() {
+    let flight = Flight::create(Uuid::new_v4(), "YSBK", "YSCN").unwrap();
+    let mut json = serde_json::to_value(&flight).unwrap();
+    json.as_object_mut().unwrap().remove("flight_rules");
+    let back: Flight = serde_json::from_value(json).unwrap();
+    assert_eq!(back.flight_rules, None);
 }
