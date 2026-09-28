@@ -56,10 +56,10 @@ test alongside it and record the regulatory basis in the doc comment.
 
 ## Consumers
 
-`pilot-logbook` depends on this crate's `main` branch (its lockfile pins a
-commit). A change to a public signature breaks its build on its next update, so
-it needs a matching `pilot-logbook` PR; prefer additive changes (a new field
-that constructors leave unset, with a `with_…` method to set it).
+`pilot-logbook` is the only consumer, and depends on this crate's `main` branch
+(its lockfile pins a commit). Choose the best API, not the compatible one: a
+breaking change is fine, landed with a matching `pilot-logbook` PR that updates
+its lockfile to it.
 
 ## Commands
 
