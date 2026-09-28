@@ -47,8 +47,8 @@ pub struct FstdSession {
     pub end: Option<UtcDateTime>,
     /// The flight rules the simulated flight was flown under, if recorded: a
     /// session simulates a flight under the IFR or the VFR as a flight is
-    /// flown under them.
-    #[serde(default)]
+    /// flown under them. The constructors leave it unrecorded; set it with
+    /// [`with_flight_rules`](Self::with_flight_rules).
     pub flight_rules: Option<FlightRules>,
 }
 
@@ -61,7 +61,6 @@ impl FstdSession {
         arrival: Option<SignificantPoint>,
         start: Option<UtcDateTime>,
         end: Option<UtcDateTime>,
-        flight_rules: Option<FlightRules>,
     ) -> Self {
         Self::with(
             Uuid::new_v4(),
@@ -71,7 +70,6 @@ impl FstdSession {
             arrival,
             start,
             end,
-            flight_rules,
         )
     }
 
@@ -87,7 +85,6 @@ impl FstdSession {
         arrival: Option<SignificantPoint>,
         start: Option<UtcDateTime>,
         end: Option<UtcDateTime>,
-        flight_rules: Option<FlightRules>,
     ) -> Self {
         Self {
             id,
@@ -97,17 +94,24 @@ impl FstdSession {
             arrival,
             start,
             end,
-            flight_rules,
+            flight_rules: None,
         }
     }
 
-    /// Convenience constructor for a session with no route, times or flight
-    /// rules recorded, validating the simulated type designator.
+    /// The same session, flown under `flight_rules` (`None`: not recorded).
+    pub fn with_flight_rules(self, flight_rules: Option<FlightRules>) -> Self {
+        Self {
+            flight_rules,
+            ..self
+        }
+    }
+
+    /// Convenience constructor for a session with no route and no times
+    /// recorded, validating the simulated type designator.
     pub fn create(device_id: Uuid, simulated_type: &str) -> Result<Self, ValidationError> {
         Ok(Self::new(
             device_id,
             Some(AircraftType::parse(simulated_type)?),
-            None,
             None,
             None,
             None,

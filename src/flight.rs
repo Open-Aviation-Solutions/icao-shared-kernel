@@ -26,7 +26,8 @@ use significant_point::SignificantPoint;
 /// `first_movement` and `last_movement` are optional because the route (the
 /// departure and arrival points) is often known before the movement times are.
 /// `flight_rules` is optional because a record may not say: it is never
-/// inferred from anything else.
+/// inferred from anything else. The constructors leave it unrecorded; set it
+/// with [`with_flight_rules`](Self::with_flight_rules).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Flight {
     pub id: Uuid,
@@ -36,7 +37,6 @@ pub struct Flight {
     pub first_movement: Option<UtcDateTime>,
     pub last_movement: Option<UtcDateTime>,
     /// The flight rules it was flown under, if recorded.
-    #[serde(default)]
     pub flight_rules: Option<FlightRules>,
 }
 
@@ -48,7 +48,6 @@ impl Flight {
         arrival: SignificantPoint,
         first_movement: Option<UtcDateTime>,
         last_movement: Option<UtcDateTime>,
-        flight_rules: Option<FlightRules>,
     ) -> Self {
         Self::with(
             Uuid::new_v4(),
@@ -57,7 +56,6 @@ impl Flight {
             arrival,
             first_movement,
             last_movement,
-            flight_rules,
         )
     }
 
@@ -72,7 +70,6 @@ impl Flight {
         arrival: SignificantPoint,
         first_movement: Option<UtcDateTime>,
         last_movement: Option<UtcDateTime>,
-        flight_rules: Option<FlightRules>,
     ) -> Self {
         Self {
             id,
@@ -81,12 +78,20 @@ impl Flight {
             arrival,
             first_movement,
             last_movement,
+            flight_rules: None,
+        }
+    }
+
+    /// The same flight, flown under `flight_rules` (`None`: not recorded).
+    pub fn with_flight_rules(self, flight_rules: Option<FlightRules>) -> Self {
+        Self {
             flight_rules,
+            ..self
         }
     }
 
     /// Convenience constructor from coded designator strings, validating them
-    /// and assigning a fresh id with no movement times or flight rules recorded.
+    /// and assigning a fresh id with no movement times recorded.
     pub fn create(
         aircraft_id: Uuid,
         departure: &str,
@@ -96,7 +101,6 @@ impl Flight {
             aircraft_id,
             SignificantPoint::designator(departure)?,
             SignificantPoint::designator(arrival)?,
-            None,
             None,
             None,
         ))

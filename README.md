@@ -15,7 +15,7 @@ Domain types:
 
 - Value objects: `Waypoint`, `Coordinate`, `SignificantPoint` (a route/flight
   path point — a coded designator *or* a lat/long coordinate), `FlightDuration`,
-  `AircraftType`, `AircraftRegistration`, `Licence`.
+  `AircraftType`, `AircraftRegistration`, `Licence`, `FlightRules`.
 - Aggregate roots: `Flight`, `Aircraft`, `Pilot`.
 - The public `validate_waypoint_code` function.
 
@@ -38,7 +38,8 @@ significant points, and the optional `first_movement` / `last_movement` UTC
 timestamps (movement under own power). Block time is a derived `duration()`,
 computed from those timestamps when both are present rather than stored. It
 also records the optional `flight_rules` it was flown under, as a flight plan's
-Item 8 states them (ICAO Doc 4444): `Ifr`, `Vfr`, `IfrThenVfr` or `VfrThenIfr`, as
+Item 8 states them (ICAO Doc 4444): `Ifr`, `Vfr`, `InitiallyIfr` or
+`InitiallyVfr` (the last two followed by one or more changes of flight rules), as
 `FstdSession` does for a simulated flight.
 
 Each validation rule is justified against a regulatory source (ICAO Annex,
