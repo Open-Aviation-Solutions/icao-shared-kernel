@@ -25,6 +25,7 @@ pub use aircraft::{Aircraft, AircraftRegistration, AircraftType};
 pub use error::ValidationError;
 pub use flight::coordinate::Coordinate;
 pub use flight::flight_duration::FlightDuration;
+pub use flight::flight_rules::FlightRules;
 pub use flight::significant_point::SignificantPoint;
 pub use flight::waypoint::{validate_waypoint_code, Waypoint};
 pub use flight::Flight;

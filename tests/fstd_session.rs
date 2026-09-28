@@ -1,6 +1,6 @@
 //! FSTD session route, duration, and the per-session simulated type.
 
-use icao_shared_kernel::{AircraftType, FstdSession, SignificantPoint};
+use icao_shared_kernel::{AircraftType, FlightRules, FstdSession, SignificantPoint};
 use time::macros::utc_datetime;
 use uuid::Uuid;
 
@@ -11,7 +11,7 @@ fn point(designator: &str) -> SignificantPoint {
 #[test]
 fn with_preserves_explicit_id() {
     let id = Uuid::new_v4();
-    let session = FstdSession::with(id, Uuid::new_v4(), None, None, None, None, None);
+    let session = FstdSession::with(id, Uuid::new_v4(), None, None, None, None, None, None);
     assert_eq!(session.id, id);
 }
 
@@ -24,6 +24,7 @@ fn duration_derived_from_timestamps() {
         None,
         Some(utc_datetime!(2026-05-01 01:00)),
         Some(utc_datetime!(2026-05-01 02:30)),
+        None,
     );
     assert_eq!(session.duration().unwrap().total_minutes(), 90);
 }
@@ -36,6 +37,7 @@ fn duration_is_none_without_both_timestamps() {
         None,
         None,
         Some(utc_datetime!(2026-05-01 01:00)),
+        None,
         None,
     );
     assert!(session.duration().is_none());
@@ -51,17 +53,18 @@ fn route_summary_needs_both_endpoints() {
         Some(point("YSCN")),
         None,
         None,
+        None,
     );
     assert_eq!(routed.route_summary().unwrap(), "YSBK-YSCN");
 
-    let one_ended = FstdSession::new(device_id, None, Some(point("YSBK")), None, None, None);
+    let one_ended = FstdSession::new(device_id, None, Some(point("YSBK")), None, None, None, None);
     assert!(one_ended.route_summary().is_none());
 }
 
 #[test]
 fn manoeuvre_only_session_records_nothing_but_the_device() {
     let device_id = Uuid::new_v4();
-    let session = FstdSession::new(device_id, None, None, None, None, None);
+    let session = FstdSession::new(device_id, None, None, None, None, None, None);
     assert_eq!(session.device_id, device_id);
     assert!(session.simulated_aircraft_type.is_none());
     assert_eq!(session.to_string(), "FSTD session");
@@ -100,6 +103,7 @@ fn display_includes_type_and_route_when_known() {
         Some(point("YMML")),
         None,
         None,
+        None,
     );
     assert_eq!(session.to_string(), "FSTD session (B738): YSSY-YMML");
 }
@@ -113,6 +117,7 @@ fn session_round_trips_through_json() {
         Some(point("YSCN")),
         Some(utc_datetime!(2026-05-01 01:00)),
         Some(utc_datetime!(2026-05-01 02:00)),
+        Some(FlightRules::Ifr),
     );
     let json = serde_json::to_string(&session).unwrap();
     let parsed: FstdSession = serde_json::from_str(&json).unwrap();
