@@ -1,6 +1,6 @@
 # Simulator device and session aggregates
 
-**Status:** in progress — implemented in the working tree, uncommitted
+**Status:** done, archived 2026-09-29 (commit `2fb6f41`).
 
 ## Purpose
 
