@@ -5,11 +5,16 @@ mod licence;
 pub use licence::Licence;
 
 use serde::{Deserialize, Serialize};
+use time::Date;
 use uuid::Uuid;
 
 use crate::error::{check_length, ValidationError};
 
 /// Pilot identity and the licences they hold.
+///
+/// The full name and date of birth are those every licence carries (ICAO Annex
+/// 1, §5.2.1 IV and IVa), and that a logbook records (CASA reg 61.345(2)). They
+/// belong to the pilot, not to a licence: a pilot holds them before holding any.
 ///
 /// A pilot can hold licences from multiple States simultaneously (ICAO Annex 1
 /// imposes no single-State restriction).
@@ -17,45 +22,45 @@ use crate::error::{check_length, ValidationError};
 #[serde(try_from = "PilotData", into = "PilotData")]
 pub struct Pilot {
     pub id: Uuid,
-    display_name: String,
-    legal_name: Option<String>,
+    full_name: String,
+    date_of_birth: Date,
     pub licences: Vec<Licence>,
 }
 
 impl Pilot {
-    /// Build a pilot with a fresh id, no legal name, and no licences.
-    pub fn new(display_name: impl Into<String>) -> Result<Self, ValidationError> {
-        Self::with(Uuid::new_v4(), display_name, None, Vec::new())
+    /// Build a pilot with a fresh id and no licences.
+    pub fn new(full_name: impl Into<String>, date_of_birth: Date) -> Result<Self, ValidationError> {
+        Self::with(Uuid::new_v4(), full_name, date_of_birth, Vec::new())
     }
 
-    /// Build a pilot from explicit parts, validating name lengths.
+    /// Build a pilot from explicit parts, validating the full name's length.
+    ///
+    /// The date of birth is not checked against today: the kernel has no
+    /// clock, so that is for a consumer that has one.
     pub fn with(
         id: Uuid,
-        display_name: impl Into<String>,
-        legal_name: Option<String>,
+        full_name: impl Into<String>,
+        date_of_birth: Date,
         licences: Vec<Licence>,
     ) -> Result<Self, ValidationError> {
-        let display_name = display_name.into();
-        check_length("display_name", &display_name, 1, 100)?;
-        if let Some(ref legal_name) = legal_name {
-            check_length("legal_name", legal_name, 0, 100)?;
-        }
+        let full_name = full_name.into();
+        check_length("full_name", &full_name, 1, 100)?;
         Ok(Self {
             id,
-            display_name,
-            legal_name,
+            full_name,
+            date_of_birth,
             licences,
         })
     }
 
-    /// Name as the pilot prefers to be addressed.
-    pub fn display_name(&self) -> &str {
-        &self.display_name
+    /// The name of the holder in full (Annex 1, §5.2.1 IV).
+    pub fn full_name(&self) -> &str {
+        &self.full_name
     }
 
-    /// Full legal name, if recorded and different from the display name.
-    pub fn legal_name(&self) -> Option<&str> {
-        self.legal_name.as_deref()
+    /// Annex 1, §5.2.1 IVa.
+    pub fn date_of_birth(&self) -> Date {
+        self.date_of_birth
     }
 }
 
@@ -67,9 +72,8 @@ impl Pilot {
 struct PilotData {
     #[serde(default = "Uuid::new_v4")]
     id: Uuid,
-    display_name: String,
-    #[serde(default)]
-    legal_name: Option<String>,
+    full_name: String,
+    date_of_birth: Date,
     #[serde(default)]
     licences: Vec<Licence>,
 }
@@ -78,7 +82,7 @@ impl TryFrom<PilotData> for Pilot {
     type Error = ValidationError;
 
     fn try_from(data: PilotData) -> Result<Self, Self::Error> {
-        Self::with(data.id, data.display_name, data.legal_name, data.licences)
+        Self::with(data.id, data.full_name, data.date_of_birth, data.licences)
     }
 }
 
@@ -86,8 +90,8 @@ impl From<Pilot> for PilotData {
     fn from(value: Pilot) -> Self {
         Self {
             id: value.id,
-            display_name: value.display_name,
-            legal_name: value.legal_name,
+            full_name: value.full_name,
+            date_of_birth: value.date_of_birth,
             licences: value.licences,
         }
     }

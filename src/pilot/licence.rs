@@ -12,7 +12,7 @@ use crate::error::{check_issuing_state, check_non_empty, ValidationError};
 /// triple is globally unique. National detail lives downstream, keyed by this
 /// identity.
 ///
-/// `number` is a string, not an integer: while ICAO Annex 1 §5.1.1.2 III)
+/// `number` is a string, not an integer: while ICAO Annex 1 §5.2.1 III)
 /// describes the serial number in Arabic numerals, real national identifiers
 /// vary — some States are purely numeric (e.g. Australia, the US) while EASA
 /// States embed letters (a country prefix and `FCL`). Annex 1 sets no length
