@@ -107,7 +107,9 @@ struct DeviceQualificationData {
     issuing_state: String,
     issuing_authority: String,
     level: String,
+    #[serde(with = "crate::iso_date")]
     valid_from: Date,
+    #[serde(with = "crate::iso_date")]
     valid_until: Date,
 }
 
