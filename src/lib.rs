@@ -19,6 +19,7 @@ pub mod error;
 pub mod flight;
 pub mod fstd;
 pub mod fstd_session;
+mod iso_date;
 pub mod pilot;
 
 pub use aircraft::{Aircraft, AircraftRegistration, AircraftType};

@@ -131,5 +131,6 @@ fn deserialising_an_invalid_period_fails() {
         "valid_from": "2026-03-01",
         "valid_until": "2026-02-28"
     }"#;
-    assert!(serde_json::from_str::<DeviceQualification>(json).is_err());
+    let error = serde_json::from_str::<DeviceQualification>(json).unwrap_err();
+    assert!(error.to_string().contains("must not precede"), "{error}");
 }

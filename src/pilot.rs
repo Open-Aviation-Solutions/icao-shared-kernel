@@ -13,7 +13,8 @@ use crate::error::{check_length, ValidationError};
 /// Pilot identity and the licences they hold.
 ///
 /// The full name and date of birth are those every licence carries (ICAO Annex
-/// 1, §5.2.1 IV and IVa), and that a logbook records (CASA reg 61.345(2)). They
+/// 1: §5.2.1 IV and IVa on paper or card, Appendix 4 IVb and IVc for an
+/// electronic licence), and that a logbook records (CASA reg 61.345(2)). They
 /// belong to the pilot, not to a licence: a pilot holds them before holding any.
 ///
 /// A pilot can hold licences from multiple States simultaneously (ICAO Annex 1
@@ -33,7 +34,10 @@ impl Pilot {
         Self::with(Uuid::new_v4(), full_name, date_of_birth, Vec::new())
     }
 
-    /// Build a pilot from explicit parts, validating the full name's length.
+    /// Build a pilot from explicit parts. The full name is trimmed, and must
+    /// then hold a name: 61.345(2) requires one. Its 100-character limit is a
+    /// bound on input, not a regulatory one (neither Annex 1 nor Part 61 sets a
+    /// length).
     ///
     /// The date of birth is not checked against today: the kernel has no
     /// clock, so that is for a consumer that has one.
@@ -43,7 +47,7 @@ impl Pilot {
         date_of_birth: Date,
         licences: Vec<Licence>,
     ) -> Result<Self, ValidationError> {
-        let full_name = full_name.into();
+        let full_name = full_name.into().trim().to_owned();
         check_length("full_name", &full_name, 1, 100)?;
         Ok(Self {
             id,
@@ -53,12 +57,12 @@ impl Pilot {
         })
     }
 
-    /// The name of the holder in full (Annex 1, §5.2.1 IV).
+    /// The name of the holder in full (Annex 1, §5.2.1 IV; Appendix 4 IVb).
     pub fn full_name(&self) -> &str {
         &self.full_name
     }
 
-    /// Annex 1, §5.2.1 IVa.
+    /// Annex 1, §5.2.1 IVa; Appendix 4 IVc.
     pub fn date_of_birth(&self) -> Date {
         self.date_of_birth
     }
@@ -73,6 +77,7 @@ struct PilotData {
     #[serde(default = "Uuid::new_v4")]
     id: Uuid,
     full_name: String,
+    #[serde(with = "crate::iso_date")]
     date_of_birth: Date,
     #[serde(default)]
     licences: Vec<Licence>,
