@@ -2,6 +2,7 @@
 name = "icao-shared-kernel"
 version = "0.1.0"
 edition = "2021"
+license = "MPL-2.0"
 description = "Rust port of the ICAO shared-kernel pure domain: validated value objects and aggregate roots. Intended as the eventual single source of truth for kernel validation (see aviation-core task 0014)."
 publish = false
 
