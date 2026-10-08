@@ -24,16 +24,25 @@ use significant_point::SignificantPoint;
 /// aggregates; they do not subclass, embed, or extend it.
 ///
 /// `first_movement` and `last_movement` are the start and the end of the
-/// flight as the applicable flight-time definition measures it: the one in the
-/// rules the flight is recorded under. They are *not* when the aircraft first
-/// and last moved under its own power, which such a definition need not turn
-/// on. CASR 1998 reg 61.010's "duration, of a flight", for one, runs for an
-/// aeroplane from when it "begins moving, whether or not under its own power,
-/// in preparation for flight", for a helicopter from when its rotor blades
-/// start turning until they stop, and for a glider from when it begins moving
-/// "whether being towed or not". Which definition applies, and so what it says
-/// for each kind of aircraft, is for a national layer: this crate holds the
-/// two instants and does not check them against one.
+/// flight: the two instants its duration is measured between. Which instants
+/// those are depends on the rules the duration is measured under, and they are
+/// not necessarily when the aircraft first and last moved under its own power.
+/// This crate does not record which rules those are, and does not check the
+/// two instants against any.
+///
+/// One State's rules, as an example and not as this crate's definition: CASR
+/// 1998 reg 61.010's "duration, of a flight" is, for an aeroplane or
+/// gyroplane, "the time from the moment the aircraft begins moving, whether or
+/// not under its own power, in preparation for flight until the moment it
+/// comes to rest at the end of the flight"; for a helicopter or powered-lift
+/// aircraft, "the time from the moment the aircraft’s rotor blades start
+/// turning until the moment the rotor blades stop turning after the aircraft
+/// comes to rest at the end of the flight"; for an airship, "the time from the
+/// moment the airship is released from its mooring until the moment it is
+/// tethered at the end of the flight"; and for a glider, "the time from the
+/// moment the glider first begins moving in preparation for flight, whether
+/// being towed or not, until the moment it comes to rest at the end of the
+/// flight".
 ///
 /// Both are optional because the route (the departure and arrival points) is
 /// often known before the times are.
@@ -46,11 +55,10 @@ pub struct Flight {
     pub aircraft_id: Uuid,
     pub departure: SignificantPoint,
     pub arrival: SignificantPoint,
-    /// The start of the flight, as the applicable flight-time definition
-    /// measures it, if recorded.
+    /// The start of the flight, from which its duration is measured, if
+    /// recorded.
     pub first_movement: Option<UtcDateTime>,
-    /// The end of the flight, as the applicable flight-time definition
-    /// measures it, if recorded.
+    /// The end of the flight, to which its duration is measured, if recorded.
     pub last_movement: Option<UtcDateTime>,
     /// The flight rules it was flown under, if recorded.
     pub flight_rules: Option<FlightRules>,
@@ -127,8 +135,8 @@ impl Flight {
         format!("{}-{}", self.departure, self.arrival)
     }
 
-    /// Block time, derived from the movement timestamps — `Some` only when both
-    /// are recorded. Rounded down to whole minutes.
+    /// The duration of the flight, derived from the movement timestamps —
+    /// `Some` only when both are recorded. Rounded down to whole minutes.
     pub fn duration(&self) -> Option<FlightDuration> {
         match (self.first_movement, self.last_movement) {
             (Some(first), Some(last)) => Some(FlightDuration::new((last - first).whole_minutes())),
