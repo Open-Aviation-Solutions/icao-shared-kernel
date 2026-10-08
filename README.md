@@ -35,7 +35,8 @@ state. `ValidationError` is a single typed enum, one variant per validation rule
 
 `Flight` is a thin hub: which aircraft flew, the `departure` and `arrival`
 significant points, and the optional `first_movement` / `last_movement` UTC
-timestamps (movement under own power). Block time is a derived `duration()`,
+timestamps (the start and end of the flight, as the applicable flight-time
+definition measures it). Block time is a derived `duration()`,
 computed from those timestamps when both are present rather than stored. It
 also records the optional `flight_rules` it was flown under, as a flight plan's
 Item 8 states them (ICAO Doc 4444): `Ifr`, `Vfr`, `InitiallyIfr` or
