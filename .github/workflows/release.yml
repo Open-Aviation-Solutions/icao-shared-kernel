@@ -1,0 +1,49 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+name: Release
+
+# Pushing a tag `v<version>` publishes that version to crates.io. Nothing else
+# does: a pull request, from a fork or not, never runs this workflow.
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # For crates.io's trusted publishing, which exchanges this job's OIDC
+      # token for a short-lived publishing token: no secret is stored.
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Check the tag names the crate's version
+        run: |
+          version=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].version')
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "The tag is $GITHUB_REF_NAME, but Cargo.toml's version is $version."
+            exit 1
+          fi
+
+      # For addlicense, which `make check` installs with `go install`.
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "1.27.3"
+          cache: false
+
+      - run: make check
+
+      - uses: rust-lang/crates-io-auth-action@v1
+        id: auth
+
+      - run: cargo publish --locked
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}

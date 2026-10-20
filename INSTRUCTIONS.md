@@ -61,6 +61,15 @@ landed with a matching PR in each consumer that updates its lockfile to it.
 Releases to crates.io follow semver for `0.x`: a release with a breaking change
 bumps the minor version.
 
+## Releasing
+
+Bump `version` in `Cargo.toml` in a pull request. Once it is merged, tag the
+merge commit `v<version>` and push the tag: the Release workflow
+(`.github/workflows/release.yml`) checks that the tag matches `Cargo.toml`, runs
+`make check` and publishes to crates.io through trusted publishing, so no
+crates.io token is kept in the repository. Only a tag push runs it. `0.1.0` was
+published by hand, before the workflow existed.
+
 ## Commands
 
 ```sh
