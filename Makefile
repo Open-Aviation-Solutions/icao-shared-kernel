@@ -1,10 +1,18 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 .DEFAULT_GOAL := help
 
-.PHONY: help dev build test lint fmt fmt-check check
+ADDLICENSE_VERSION := v1.2.0
+# Installed here, at this version, so that every machine checks with the same one.
+ADDLICENSE := $(CURDIR)/.bin/addlicense-$(ADDLICENSE_VERSION)/addlicense
+
+.PHONY: help dev build test lint fmt fmt-check license-check check
 
 help: ## List available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
-		| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
+		| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
 
 dev: build ## Start the development environment (builds the crate)
 
@@ -23,4 +31,13 @@ fmt: ## Format the code
 fmt-check: ## Check formatting without modifying files
 	cargo fmt --check
 
-check: lint fmt-check test ## Run all checks: lint, format check, tests
+$(ADDLICENSE):
+	GOBIN=$(dir $(ADDLICENSE)) go install github.com/google/addlicense@$(ADDLICENSE_VERSION)
+
+# addlicense checks the tracked files of the types it knows (Rust, TOML, YAML)
+# for a licence header, and passes over the rest (Cargo.lock, Markdown, LICENSE).
+# It does not recognise a Makefile, so it does not check this one.
+license-check: $(ADDLICENSE) ## Check that each source file carries a licence header
+	git ls-files -z | xargs -0 $(ADDLICENSE) -check -l mpl
+
+check: lint fmt-check license-check test ## Run all checks: lint, format check, licence headers, tests

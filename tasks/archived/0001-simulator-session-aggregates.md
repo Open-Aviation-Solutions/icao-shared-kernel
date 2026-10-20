@@ -10,9 +10,8 @@ both a Doc 8643 type designator and Annex 7 registration marks, so a session
 flown on a device that is not an aircraft has nowhere to go.
 
 The old Python kernel worked around this by modelling a simulator *as* an
-`Aircraft` carrying `sim_type` / `is_regulatory_sim` fields. Task `0011` in
-`icao-shared-kernel` removed those fields, and the tightened value objects in
-this crate mean the workaround no longer even constructs: `AircraftType`
+`Aircraft` carrying `sim_type` / `is_regulatory_sim` fields. It later removed
+those fields, and the tightened value objects in this crate mean the workaround no longer even constructs: `AircraftType`
 rejects anything outside the Doc 8643 shape (`ZZZZ` means *"real aircraft, no
 assigned designator"*, not *"not an aircraft"*), and `AircraftRegistration`
 caps the registration mark at 5 characters, rejecting the `"UNKNWN"`
@@ -67,21 +66,17 @@ EASA FTD Levels 1–3). Build it when a consumer needs to compare levels.
 
 ### Naming — from ICAO Annex 1, verified
 
-ICAO Annex 1 (Personnel Licensing), Fourteenth Edition, July 2022, Chapter 1:
+ICAO Annex 1 (Personnel Licensing), Fourteenth Edition, July 2022, Chapter 1,
+defines a **flight simulation training device (FSTD)** as any of three kinds of
+apparatus that simulate flight conditions on the ground (paraphrased here):
 
-> **Flight simulation training device (FSTD).** Any one of the following three
-> types of apparatus in which flight conditions are simulated on the ground:
->
-> A **flight simulator**, which provides an accurate representation of the
-> flight deck of a particular aircraft type […];
->
-> A **flight procedures trainer**, which provides a realistic flight deck
-> environment […] and the performance and flight characteristics of aircraft
-> of a particular class;
->
-> A **basic instrument flight trainer**, which is equipped with appropriate
-> instruments, and which simulates the flight deck environment of an aircraft
-> in flight […] in instrument flight conditions.
+- a **flight simulator** represents the flight deck of one aircraft *type*
+  accurately;
+- a **flight procedures trainer** gives a realistic flight deck environment,
+  with the performance and flight characteristics of aircraft of one *class*;
+- a **basic instrument flight trainer** has the appropriate instruments and
+  simulates an aircraft's flight deck environment in flight, in instrument
+  flight conditions.
 
 This is the kernel's term and the source of all three `kind` variants.
 
@@ -125,7 +120,7 @@ reason: only one of the three kinds is a simulator.
 - `pilot-logbook` — needs its own task: snapshot the recognition onto the
   logbook record at logging time, give `EnrichedEntry` a discriminated
   flown-aircraft vs simulated-session subject, and rewire the six call sites
-  that still import from the renamed `aviation_core` package.
+  that still read the removed fields.
 
 ## Notes for the implementer
 

@@ -1,48 +1,46 @@
-# icao-shared-kernel-rs — Working Instructions
+# icao-shared-kernel — Working Instructions
 
-A native Rust port of the pure domain of the `icao-shared-kernel` Python
-package (sibling repo `../aviation-core`). This crate is the native-Rust spike
-from `aviation-core` task `0014-rust-wasm-portable-domain-core.md`.
+The pure domain of the ICAO shared kernel, in Rust. It began as a port of an
+earlier Python package, which it has replaced.
 
 ## Purpose and scope
 
-This crate is the **active design surface** for the kernel's domain — the
-direction agreed in task 0014, with Rust as the intended single source of truth
-for domain validation. The Python `icao-shared-kernel` package is unpublished
-and is **not** kept in lockstep; the domain is now being evolved here, and the
-two have deliberately diverged (e.g. the `Licence` identity, `SignificantPoint`
-route endpoints, and movement-timestamp modelling below have no Python
-equivalent yet). If the Python package is ever revived, it follows this crate,
-not the other way round.
+This crate is the **active design surface** for the kernel's domain, and the
+single source of truth for domain validation. The earlier Python package is
+retired and was never kept in lockstep: the domain is evolved here.
 
 In scope: value objects, aggregate roots, their invariants and derived values.
 
 Out of scope (do not add here): repository protocols / async I/O, infrastructure
 adapters (Postgres, filesystem, admin), and — for now — WASM/WIT and any
-language bindings (PyO3, etc.). Those are separate, later steps in task 0014.
+language bindings (PyO3, etc.). Bindings live in their own repositories.
 
 ## Validation rules are the contract
 
 Every value object owns its invariants and is the single place they live. Each
 rule should be justified against a regulatory source (ICAO Annex, CASA Part 61)
 rather than copied from the earlier Python model — where the two differ, this
-crate is correct. The Python pytest suite under `aviation-core/tests/models/`
-is now only *historical reference* for how a rule once behaved, not a spec to
-match.
+crate is correct.
 
 Each rule is covered by a test in `tests/`. When you change a rule, change its
 test alongside it and record the regulatory basis in the doc comment.
 
 ## Conventions
 
-- **Discuss before implementing** non-trivial design changes, consistent with
-  the `aviation-core` working style.
+- **Discuss before implementing** non-trivial design changes.
 - **Regulatory terms only**: names and terminology must be verifiable against
-  the same regulatory sources as the Python kernel (ICAO Annexes, CASA Part 61),
+  the regulatory sources (ICAO Annexes, CASA Part 61),
   and the ICAO procedures they rest on (Doc 4444, PANS-ATM, for a flight plan's
   items).
 - **No vendored ICAO-copyrighted data** — only validation *rules* (facts) are
-  ported, consistent with `aviation-core` task 0012.
+  ported.
+- **The MPL notice heads each file** in `src/`, `tests/`, the `Makefile`,
+  `Cargo.toml` and the CI workflow (the licence's Exhibit A, in that file's
+  comment syntax); `addlicense -l mpl <file>` adds it. `make license-check`,
+  part of `make check`, runs `addlicense -check` over the tracked files, which
+  fails on a Rust, TOML or YAML file with no licence header, though it does not
+  check that the header is the MPL's wording. It does not check the
+  `Makefile`, which it does not recognise.
 - Value objects use *parse, don't validate*: a fallible smart constructor
   returning `Result<Self, ValidationError>`; no public way to build an invalid value.
 - Module layout: each aggregate is a module file (`flight.rs`) with a sibling
@@ -56,16 +54,18 @@ test alongside it and record the regulatory basis in the doc comment.
 
 ## Consumers
 
-`pilot-logbook` is the only consumer, and depends on this crate's `main` branch
-(its lockfile pins a commit). Choose the best API, not the compatible one: a
-breaking change is fine, landed with a matching `pilot-logbook` PR that updates
-its lockfile to it.
+`pilot-logbook` and `icao-shared-kernel-py` (the Python bindings) are the
+consumers, and each depends on this crate's `main` branch (its lockfile pins a
+commit). Choose the best API, not the compatible one: a breaking change is fine,
+landed with a matching PR in each consumer that updates its lockfile to it.
+Releases to crates.io follow semver for `0.x`: a release with a breaking change
+bumps the minor version.
 
 ## Commands
 
 ```sh
-make test       # cargo test — the parity suite
+make test       # cargo test — the test suite
 make lint       # cargo clippy -- -D warnings
 make fmt        # cargo fmt
-make check      # lint + fmt check + test
+make check      # lint + fmt check + licence headers + test
 ```

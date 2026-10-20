@@ -1,10 +1,16 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 [package]
 name = "icao-shared-kernel"
 version = "0.1.0"
 edition = "2021"
 license = "MPL-2.0"
-description = "Rust port of the ICAO shared-kernel pure domain: validated value objects and aggregate roots. Intended as the eventual single source of truth for kernel validation (see aviation-core task 0014)."
-publish = false
+description = "Validated value objects and aggregates for ICAO aviation concepts (flights, aircraft, pilots' licences, flight simulation training devices), shared by the Open Aviation Solutions tools."
+repository = "https://github.com/Open-Aviation-Solutions/icao-shared-kernel"
+readme = "README.md"
+include = ["/src", "/tests", "/README.md", "/LICENSE"]
 
 [lib]
 name = "icao_shared_kernel"
