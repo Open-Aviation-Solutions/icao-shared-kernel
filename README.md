@@ -23,8 +23,8 @@ What is covered:
 
 - Value objects: `Waypoint`, `Coordinate`, `SignificantPoint` (a coded
   designator *or* a latitude and longitude), `FlightDuration`, `FlightRules`,
-  `AircraftType`, `AircraftRegistration`, `Licence`, `DeviceDesignation`,
-  `DeviceQualification`, and the public `validate_waypoint_code` function.
+  `AircraftType`, `AircraftRegistration`, `Licence`, `FstdKind`,
+  `DeviceDesignation`, `DeviceQualification`, and the public `validate_waypoint_code` function.
 - Aggregates: `Flight`, `Aircraft`, `Pilot`, `FlightSimulationTrainingDevice`
   and `FstdSession`.
 - One error type, `ValidationError`, with a variant for each rule.
@@ -106,21 +106,18 @@ replaced.
 
 Report a problem, or propose a change, in this repository's
 [issues](https://github.com/Open-Aviation-Solutions/icao-shared-kernel/issues).
-The organisation's contributing guide, security policy and code of conduct
-are not written yet; they are tracked in Open-Aviation-Solutions/pilot-logbook#108.
 
 ## Development
 
 Requires a Rust toolchain, a C linker (`build-essential` on Debian/Ubuntu),
 and Go, which `make check` uses to install
-[addlicense](https://github.com/google/addlicense) when it is not on the
-`PATH`.
+[addlicense](https://github.com/google/addlicense) into `.bin/` the first time.
 
 ```sh
 make help            # list targets
 make dev             # build
 make test            # run the test suite
-make check           # clippy, format check, licence notices, tests
+make check           # clippy, format check, licence headers, tests
 ```
 
 ## Licence

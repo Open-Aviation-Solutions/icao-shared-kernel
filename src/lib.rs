@@ -37,3 +37,8 @@ pub use flight::Flight;
 pub use fstd::{DeviceDesignation, DeviceQualification, FlightSimulationTrainingDevice, FstdKind};
 pub use fstd_session::FstdSession;
 pub use pilot::{Licence, Pilot};
+
+// Compiles and runs the README's examples with the doc tests.
+#[cfg(doctest)]
+#[doc = include_str!("../README.md")]
+struct ReadmeDoctests;

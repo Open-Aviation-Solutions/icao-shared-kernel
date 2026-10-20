@@ -24,7 +24,7 @@ jobs:
       # For addlicense, which `make check` installs with `go install`.
       - uses: actions/setup-go@v6
         with:
-          go-version: stable
+          go-version: "1.27.3"
           cache: false
 
       - run: make check

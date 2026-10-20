@@ -36,8 +36,12 @@ test alongside it and record the regulatory basis in the doc comment.
   ported.
 - **The MPL notice heads each file** in `src/`, `tests/`, the `Makefile`,
   `Cargo.toml` and the CI workflow (the licence's Exhibit A, in that file's
-  comment syntax). `make license-check`, part of `make check`, fails on a file
-  without one; `addlicense -l mpl <file>` adds it.
+  comment syntax); `addlicense -l mpl <file>` adds it. `make license-check`,
+  part of `make check`, runs `addlicense -check` over the tracked files, which
+  fails on a Rust, TOML or YAML file with no licence header, though it does not
+  check that the header is the MPL's wording. addlicense passes over a
+  `Makefile` without a word, so the Makefile's own notice is checked by a
+  separate line of the target.
 - Value objects use *parse, don't validate*: a fallible smart constructor
   returning `Result<Self, ValidationError>`; no public way to build an invalid value.
 - Module layout: each aggregate is a module file (`flight.rs`) with a sibling
@@ -51,16 +55,16 @@ test alongside it and record the regulatory basis in the doc comment.
 
 ## Consumers
 
-`pilot-logbook` is the only consumer, and depends on this crate's `main` branch
-(its lockfile pins a commit). Choose the best API, not the compatible one: a
-breaking change is fine, landed with a matching `pilot-logbook` PR that updates
-its lockfile to it.
+`pilot-logbook` and `icao-shared-kernel-py` (the Python bindings) are the
+consumers, and each depends on this crate's `main` branch (its lockfile pins a
+commit). Choose the best API, not the compatible one: a breaking change is fine,
+landed with a matching PR in each consumer that updates its lockfile to it.
 
 ## Commands
 
 ```sh
-make test       # cargo test — the parity suite
+make test       # cargo test — the test suite
 make lint       # cargo clippy -- -D warnings
 make fmt        # cargo fmt
-make check      # lint + fmt check + licence notices + test
+make check      # lint + fmt check + licence headers + test
 ```

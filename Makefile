@@ -5,8 +5,8 @@
 .DEFAULT_GOAL := help
 
 ADDLICENSE_VERSION := v1.2.0
-# addlicense from the PATH, or else where `go install` puts it.
-ADDLICENSE ?= $(or $(shell command -v addlicense 2>/dev/null),$(shell go env GOPATH 2>/dev/null)/bin/addlicense)
+# Installed here, at this version, so that every machine checks with the same one.
+ADDLICENSE := $(CURDIR)/.bin/addlicense-$(ADDLICENSE_VERSION)/addlicense
 
 .PHONY: help dev build test lint fmt fmt-check license-check check
 
@@ -32,13 +32,14 @@ fmt-check: ## Check formatting without modifying files
 	cargo fmt --check
 
 $(ADDLICENSE):
-	go install github.com/google/addlicense@$(ADDLICENSE_VERSION)
+	GOBIN=$(dir $(ADDLICENSE)) go install github.com/google/addlicense@$(ADDLICENSE_VERSION)
 
-# addlicense passes over a Makefile, which it does not recognise, so this one
-# is checked on its own.
-license-check: $(ADDLICENSE) ## Check that each source file carries the MPL 2.0 notice
-	$(ADDLICENSE) -check -l mpl -ignore 'target/**' .
+# addlicense checks the tracked files of the types it knows (Rust, TOML, YAML)
+# for a licence header, and passes over the rest (Cargo.lock, Markdown, LICENSE).
+# It does not recognise a Makefile, so this one is checked on its own.
+license-check: $(ADDLICENSE) ## Check that each source file carries a licence header
+	git ls-files -z | xargs -0 $(ADDLICENSE) -check -l mpl
 	@head -3 Makefile | grep -qF 'file, You can obtain one at https://mozilla.org/MPL/2.0/.' \
 		|| { echo "Makefile: the MPL 2.0 notice is missing from its first lines"; exit 1; }
 
-check: lint fmt-check license-check test ## Run all checks: lint, format check, licence notices, tests
+check: lint fmt-check license-check test ## Run all checks: lint, format check, licence headers, tests
