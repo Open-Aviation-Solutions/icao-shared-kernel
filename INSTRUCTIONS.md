@@ -63,14 +63,18 @@ bumps the minor version.
 
 ## Releasing
 
-Bump `version` in `Cargo.toml` in a pull request. Once it is merged, tag the
-merge commit `v<version>` and push the tag: the Release workflow
-(`.github/workflows/release.yml`) checks that the tag matches `Cargo.toml`, runs
-`make check` and publishes to crates.io through trusted publishing, so no
-crates.io token is kept in the repository. Only a tag push runs it, and its
-job runs in the `release` environment, which GitHub allows only for tags
-matching `v*` and which crates.io requires of the trusted publisher. `0.1.0` was
-published by hand, before the workflow existed.
+Bump `version` in `Cargo.toml` in a pull request, and merge it: that is the
+release. On each push to `main`, the Release workflow
+(`.github/workflows/release.yml`) asks crates.io whether `Cargo.toml`'s version
+is there yet. When it is not, it runs `make check`, publishes it through trusted
+publishing (no crates.io token is kept in the repository), and tags the commit
+`v<version>`. Don't push version tags by hand: nothing runs on them.
+
+Only `main` can release. The publishing job runs in the `release` environment,
+which GitHub allows only on `main`, and crates.io's trusted publisher accepts
+only that environment; `main` changes only through a pull request with CI
+passing. So a workflow run on any other branch cannot get a publishing token.
+`0.1.0` was published by hand, before the workflow existed.
 
 ## Commands
 
