@@ -10,9 +10,8 @@ both a Doc 8643 type designator and Annex 7 registration marks, so a session
 flown on a device that is not an aircraft has nowhere to go.
 
 The old Python kernel worked around this by modelling a simulator *as* an
-`Aircraft` carrying `sim_type` / `is_regulatory_sim` fields. Task `0011` in
-`icao-shared-kernel` removed those fields, and the tightened value objects in
-this crate mean the workaround no longer even constructs: `AircraftType`
+`Aircraft` carrying `sim_type` / `is_regulatory_sim` fields. It later removed
+those fields, and the tightened value objects in this crate mean the workaround no longer even constructs: `AircraftType`
 rejects anything outside the Doc 8643 shape (`ZZZZ` means *"real aircraft, no
 assigned designator"*, not *"not an aircraft"*), and `AircraftRegistration`
 caps the registration mark at 5 characters, rejecting the `"UNKNWN"`
@@ -125,7 +124,7 @@ reason: only one of the three kinds is a simulator.
 - `pilot-logbook` — needs its own task: snapshot the recognition onto the
   logbook record at logging time, give `EnrichedEntry` a discriminated
   flown-aircraft vs simulated-session subject, and rewire the six call sites
-  that still import from the renamed `aviation_core` package.
+  that still read the removed fields.
 
 ## Notes for the implementer
 
