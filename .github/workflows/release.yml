@@ -19,7 +19,7 @@ jobs:
       # token for a short-lived publishing token: no secret is stored.
       id-token: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -34,7 +34,7 @@ jobs:
           fi
 
       # For addlicense, which `make check` installs with `go install`.
-      - uses: actions/setup-go@v6
+      - uses: actions/setup-go@v7
         with:
           go-version: "1.27.3"
           cache: false
