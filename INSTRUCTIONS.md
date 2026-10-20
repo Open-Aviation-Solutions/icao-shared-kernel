@@ -67,7 +67,9 @@ Bump `version` in `Cargo.toml` in a pull request. Once it is merged, tag the
 merge commit `v<version>` and push the tag: the Release workflow
 (`.github/workflows/release.yml`) checks that the tag matches `Cargo.toml`, runs
 `make check` and publishes to crates.io through trusted publishing, so no
-crates.io token is kept in the repository. Only a tag push runs it. `0.1.0` was
+crates.io token is kept in the repository. Only a tag push runs it, and its
+job runs in the `release` environment, which GitHub allows only for tags
+matching `v*` and which crates.io requires of the trusted publisher. `0.1.0` was
 published by hand, before the workflow existed.
 
 ## Commands

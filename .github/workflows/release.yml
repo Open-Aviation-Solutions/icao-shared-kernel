@@ -13,6 +13,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    # GitHub runs this job only for a ref the environment allows (tags `v*`),
+    # and crates.io's trusted publisher accepts only this environment.
+    environment: release
     permissions:
       contents: read
       # For crates.io's trusted publishing, which exchanges this job's OIDC
