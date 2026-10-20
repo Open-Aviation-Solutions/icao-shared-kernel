@@ -39,9 +39,8 @@ test alongside it and record the regulatory basis in the doc comment.
   comment syntax); `addlicense -l mpl <file>` adds it. `make license-check`,
   part of `make check`, runs `addlicense -check` over the tracked files, which
   fails on a Rust, TOML or YAML file with no licence header, though it does not
-  check that the header is the MPL's wording. addlicense passes over a
-  `Makefile` without a word, so the Makefile's own notice is checked by a
-  separate line of the target.
+  check that the header is the MPL's wording. It does not check the
+  `Makefile`, which it does not recognise.
 - Value objects use *parse, don't validate*: a fallible smart constructor
   returning `Result<Self, ValidationError>`; no public way to build an invalid value.
 - Module layout: each aggregate is a module file (`flight.rs`) with a sibling

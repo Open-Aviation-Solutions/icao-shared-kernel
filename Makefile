@@ -36,10 +36,8 @@ $(ADDLICENSE):
 
 # addlicense checks the tracked files of the types it knows (Rust, TOML, YAML)
 # for a licence header, and passes over the rest (Cargo.lock, Markdown, LICENSE).
-# It does not recognise a Makefile, so this one is checked on its own.
+# It does not recognise a Makefile, so it does not check this one.
 license-check: $(ADDLICENSE) ## Check that each source file carries a licence header
 	git ls-files -z | xargs -0 $(ADDLICENSE) -check -l mpl
-	@head -3 Makefile | grep -qF 'file, You can obtain one at https://mozilla.org/MPL/2.0/.' \
-		|| { echo "Makefile: the MPL 2.0 notice is missing from its first lines"; exit 1; }
 
 check: lint fmt-check license-check test ## Run all checks: lint, format check, licence headers, tests

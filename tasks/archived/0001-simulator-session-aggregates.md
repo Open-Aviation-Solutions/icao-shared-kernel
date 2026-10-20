@@ -66,21 +66,17 @@ EASA FTD Levels 1–3). Build it when a consumer needs to compare levels.
 
 ### Naming — from ICAO Annex 1, verified
 
-ICAO Annex 1 (Personnel Licensing), Fourteenth Edition, July 2022, Chapter 1:
+ICAO Annex 1 (Personnel Licensing), Fourteenth Edition, July 2022, Chapter 1,
+defines a **flight simulation training device (FSTD)** as any of three kinds of
+apparatus that simulate flight conditions on the ground (paraphrased here):
 
-> **Flight simulation training device (FSTD).** Any one of the following three
-> types of apparatus in which flight conditions are simulated on the ground:
->
-> A **flight simulator**, which provides an accurate representation of the
-> flight deck of a particular aircraft type […];
->
-> A **flight procedures trainer**, which provides a realistic flight deck
-> environment […] and the performance and flight characteristics of aircraft
-> of a particular class;
->
-> A **basic instrument flight trainer**, which is equipped with appropriate
-> instruments, and which simulates the flight deck environment of an aircraft
-> in flight […] in instrument flight conditions.
+- a **flight simulator** represents the flight deck of one aircraft *type*
+  accurately;
+- a **flight procedures trainer** gives a realistic flight deck environment,
+  with the performance and flight characteristics of aircraft of one *class*;
+- a **basic instrument flight trainer** has the appropriate instruments and
+  simulates an aircraft's flight deck environment in flight, in instrument
+  flight conditions.
 
 This is the kernel's term and the source of all three `kind` variants.
 
