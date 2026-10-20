@@ -14,10 +14,9 @@ tools, and is the part of them that has no country's rules in it.
 
 ## Status
 
-Early, and not yet released: the version is `0.1.0`, nothing has been
-published to crates.io, and it is used by git (see below). Until `1.0`, the
-API may change between minor versions, and on `main` a breaking change lands
-whenever it gives a better API, together with the changes its users need.
+Early: the version is `0.1.0`. Until `1.0`, the API may change between minor
+versions, and on `main` a breaking change lands whenever it gives a better API,
+together with the changes its users need.
 
 What is covered:
 
@@ -61,15 +60,21 @@ crate accepts is well formed, not necessarily correct.
 
 ## Using it
 
-Until `0.1.0` is released to crates.io, depend on it by git. Pin a commit
-with `rev`, since `main` can change its API at any time:
+Add it from crates.io:
+
+```sh
+cargo add icao-shared-kernel
+```
+
+or in `Cargo.toml`:
 
 ```toml
 [dependencies]
-icao-shared-kernel = { git = "https://github.com/Open-Aviation-Solutions/icao-shared-kernel", rev = "<commit>" }
+icao-shared-kernel = "0.1"
 ```
 
-Once it is released, it will be `icao-shared-kernel = "0.1"` from crates.io.
+To follow `main` instead, depend on it by git and pin a commit with `rev`,
+since `main` can change its API at any time.
 
 ```rust
 use icao_shared_kernel::{Aircraft, Flight, ValidationError};

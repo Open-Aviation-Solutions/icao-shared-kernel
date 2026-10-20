@@ -58,6 +58,8 @@ test alongside it and record the regulatory basis in the doc comment.
 consumers, and each depends on this crate's `main` branch (its lockfile pins a
 commit). Choose the best API, not the compatible one: a breaking change is fine,
 landed with a matching PR in each consumer that updates its lockfile to it.
+Releases to crates.io follow semver for `0.x`: a release with a breaking change
+bumps the minor version.
 
 ## Commands
 
