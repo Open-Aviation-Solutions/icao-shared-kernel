@@ -1,13 +1,15 @@
 # icao-shared-kernel — Working Instructions
 
-The pure domain of the ICAO shared kernel, in Rust. It began as a port of an
-earlier Python package, which it has replaced.
+Value objects and aggregates for International Civil Aviation Organization
+concepts, in Rust. It began as a port of an earlier Python package, which it
+has replaced.
 
 ## Purpose and scope
 
-This crate is the **active design surface** for the kernel's domain, and the
-single source of truth for domain validation. The earlier Python package is
-retired and was never kept in lockstep: the domain is evolved here.
+This crate is the **active design surface** for the aviation concepts ICAO
+standardises across States (aircraft, pilots' licences, flights, flight
+simulation training devices), and the single source of truth for their
+validation.
 
 In scope: value objects, aggregate roots, their invariants and derived values.
 
@@ -18,9 +20,8 @@ language bindings (PyO3, etc.). Bindings live in their own repositories.
 ## Validation rules are the contract
 
 Every value object owns its invariants and is the single place they live. Each
-rule should be justified against a regulatory source (ICAO Annex, CASA Part 61)
-rather than copied from the earlier Python model — where the two differ, this
-crate is correct.
+rule should be justified against an ICAO source (an Annex or Document). A State's
+own rules, such as Australia's CASA Part 61, stay out of this crate.
 
 Each rule is covered by a test in `tests/`. When you change a rule, change its
 test alongside it and record the regulatory basis in the doc comment.
@@ -29,9 +30,8 @@ test alongside it and record the regulatory basis in the doc comment.
 
 - **Discuss before implementing** non-trivial design changes.
 - **Regulatory terms only**: names and terminology must be verifiable against
-  the regulatory sources (ICAO Annexes, CASA Part 61),
-  and the ICAO procedures they rest on (Doc 4444, PANS-ATM, for a flight plan's
-  items).
+  the ICAO Annexes and the procedures they rest on (Doc 4444, PANS-ATM, for a
+  flight plan's items).
 - **No vendored ICAO-copyrighted data** — only validation *rules* (facts) are
   ported.
 - **The MPL notice heads each file** in `src/`, `tests/`, the `Makefile`,
@@ -54,12 +54,14 @@ test alongside it and record the regulatory basis in the doc comment.
 
 ## Consumers
 
-`pilot-logbook` and `icao-shared-kernel-py` (the Python bindings) are the
-consumers, and each depends on this crate's `main` branch (its lockfile pins a
-commit). Choose the best API, not the compatible one: a breaking change is fine,
-landed with a matching PR in each consumer that updates its lockfile to it.
-Releases to crates.io follow semver for `0.x`: a release with a breaking change
-bumps the minor version.
+`pilot-logbook` and `icao-shared-kernel-py` (the Python bindings) depend on
+this crate. `au-casa` does not yet, but its simulator classification (its task
+`0002`) will build on the FSTD aggregates.
+
+Choose the best API, not the compatible one: while the crate is on `0.x`, a
+breaking change is fine, landed with a matching PR in each consumer. Releases
+follow semver for `0.x`: a release with a breaking change bumps the minor
+version.
 
 ## Releasing
 
@@ -73,8 +75,7 @@ publishing (no crates.io token is kept in the repository), and tags the commit
 Only `main` can release. The publishing job runs in the `release` environment,
 which GitHub allows only on `main`, and crates.io's trusted publisher accepts
 only that environment; `main` changes only through a pull request with CI
-passing. So a workflow run on any other branch cannot get a publishing token.
-`0.1.0` was published by hand, before the workflow existed.
+passing.
 
 ## Commands
 

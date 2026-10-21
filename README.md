@@ -94,12 +94,11 @@ Each value object has a constructor that returns
 `Result<Self, ValidationError>` (`Waypoint::parse`, `Licence::new`, …); there
 is no other way to build one. The aggregates hold only validated values, so
 they cannot represent an invalid state either. Each rule's rustdoc names its
-regulatory source (an ICAO Annex or Document, or CASA Part 61), and each rule
-has a test under `tests/`.
+regulatory source (an ICAO Annex or Document), and each rule has a test under
+`tests/`.
 
 ## Other repositories
 
-- **pilot-logbook**, a pilot's logbook, is built on this crate.
 - **icao-shared-kernel-py** is its Python bindings.
 - **[au-casa](https://github.com/Open-Aviation-Solutions/au-casa)** holds
   Australia's rules (CASA Part 61), which are kept out of this crate.
