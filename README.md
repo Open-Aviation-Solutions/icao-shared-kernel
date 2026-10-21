@@ -94,12 +94,11 @@ Each value object has a constructor that returns
 `Result<Self, ValidationError>` (`Waypoint::parse`, `Licence::new`, …); there
 is no other way to build one. The aggregates hold only validated values, so
 they cannot represent an invalid state either. Each rule's rustdoc names its
-regulatory source (an ICAO Annex or Document, or CASA Part 61), and each rule
-has a test under `tests/`.
+regulatory source (an ICAO Annex or Document), and each rule has a test under
+`tests/`.
 
 ## Other repositories
 
-- **pilot-logbook**, a pilot's logbook, is built on this crate.
 - **icao-shared-kernel-py** is its Python bindings.
 - **[au-casa](https://github.com/Open-Aviation-Solutions/au-casa)** holds
   Australia's rules (CASA Part 61), which are kept out of this crate.
@@ -114,9 +113,10 @@ Report a problem, or propose a change, in this repository's
 
 ## Development
 
-Requires a Rust toolchain, a C linker (`build-essential` on Debian/Ubuntu),
-and Go, which `make check` uses to install
-[addlicense](https://github.com/google/addlicense) into `.bin/` the first time.
+Requires a Rust toolchain, a C linker (`build-essential` on Debian/Ubuntu) and
+`curl`. The first `make check` downloads
+[addlicense](https://github.com/google/addlicense)'s release binary into
+`.bin/`, and checks it against the checksum pinned in the `Makefile`.
 
 ```sh
 make help            # list targets
