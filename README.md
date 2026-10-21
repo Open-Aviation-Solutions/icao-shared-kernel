@@ -114,9 +114,10 @@ Report a problem, or propose a change, in this repository's
 
 ## Development
 
-Requires a Rust toolchain, a C linker (`build-essential` on Debian/Ubuntu),
-and Go, which `make check` uses to install
-[addlicense](https://github.com/google/addlicense) into `.bin/` the first time.
+Requires a Rust toolchain, a C linker (`build-essential` on Debian/Ubuntu) and
+`curl`. The first `make check` downloads
+[addlicense](https://github.com/google/addlicense)'s release binary into
+`.bin/`, and checks it against the checksum pinned in the `Makefile`.
 
 ```sh
 make help            # list targets
