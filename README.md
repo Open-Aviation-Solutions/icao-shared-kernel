@@ -14,7 +14,7 @@ tools, and is the part of them that has no country's rules in it.
 
 ## Status
 
-Early: the version is `0.1.0`. Until `1.0`, the API may change between minor
+Early: the version is `0.1.2`. Until `1.0`, the API may change between minor
 versions, and on `main` a breaking change lands whenever it gives a better API,
 together with the changes its users need.
 
@@ -22,7 +22,9 @@ What is covered:
 
 - Value objects: `Waypoint`, `Coordinate`, `SignificantPoint` (a coded
   designator *or* a latitude and longitude), `FlightDuration`, `FlightRules`,
-  `AircraftType`, `AircraftRegistration`, `Licence`, `FstdKind`,
+  `AircraftType`, `AircraftRegistration`, `Licence` (with the titles of
+  licence held under it: `IssuedTitle`, `LicenceTitle` and its categories,
+  `AircraftCategory`), `FstdKind`,
   `DeviceDesignation`, `DeviceQualification`, and the public `validate_waypoint_code` function.
 - Aggregates: `Flight`, `Aircraft`, `Pilot`, `FlightSimulationTrainingDevice`
   and `FstdSession`.

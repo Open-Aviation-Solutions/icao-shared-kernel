@@ -4,9 +4,17 @@
 
 //! The `Pilot` aggregate root and the licences it holds.
 
+mod aircraft_category;
 mod licence;
+mod licence_title;
 
+pub use aircraft_category::AircraftCategory;
 pub use licence::Licence;
+pub use licence_title::{
+    AirlineTransportCategory, IssuedTitle, LicenceTitle, PrivateOrCommercialCategory,
+};
+
+use std::collections::HashSet;
 
 use serde::{Deserialize, Serialize};
 use time::Date;
@@ -29,7 +37,7 @@ pub struct Pilot {
     pub id: Uuid,
     full_name: String,
     date_of_birth: Date,
-    pub licences: Vec<Licence>,
+    licences: Vec<Licence>,
 }
 
 impl Pilot {
@@ -43,6 +51,9 @@ impl Pilot {
     /// bound on input, not a regulatory one (neither Annex 1 nor Part 61 sets a
     /// length).
     ///
+    /// The same licence, by its identity, is refused if listed twice: two
+    /// entries could disagree on its titles and their dates.
+    ///
     /// The date of birth is not checked against today: the kernel has no
     /// clock, so that is for a consumer that has one.
     pub fn with(
@@ -53,6 +64,21 @@ impl Pilot {
     ) -> Result<Self, ValidationError> {
         let full_name = full_name.into().trim().to_owned();
         check_length("full_name", &full_name, 1, 100)?;
+        let mut seen = HashSet::new();
+        let repeated = licences.iter().find(|licence| {
+            !seen.insert((
+                licence.issuing_state(),
+                licence.issuing_authority(),
+                licence.number(),
+            ))
+        });
+        if let Some(licence) = repeated {
+            return Err(ValidationError::RepeatedLicence {
+                issuing_state: licence.issuing_state().to_owned(),
+                issuing_authority: licence.issuing_authority().to_owned(),
+                number: licence.number().to_owned(),
+            });
+        }
         Ok(Self {
             id,
             full_name,
@@ -69,6 +95,11 @@ impl Pilot {
     /// Annex 1, §5.2.1 IVa; Appendix 4 IVc.
     pub fn date_of_birth(&self) -> Date {
         self.date_of_birth
+    }
+
+    /// The licences the pilot holds, no two with the same identity.
+    pub fn licences(&self) -> &[Licence] {
+        &self.licences
     }
 }
 
