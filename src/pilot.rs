@@ -37,7 +37,7 @@ pub struct Pilot {
     pub id: Uuid,
     full_name: String,
     date_of_birth: Date,
-    pub licences: Vec<Licence>,
+    licences: Vec<Licence>,
 }
 
 impl Pilot {
@@ -95,6 +95,11 @@ impl Pilot {
     /// Annex 1, §5.2.1 IVa; Appendix 4 IVc.
     pub fn date_of_birth(&self) -> Date {
         self.date_of_birth
+    }
+
+    /// The licences the pilot holds, no two with the same identity.
+    pub fn licences(&self) -> &[Licence] {
+        &self.licences
     }
 }
 

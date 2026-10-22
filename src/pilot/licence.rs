@@ -35,10 +35,10 @@ use crate::error::{check_issuing_state, check_non_empty, ValidationError};
 /// (5.2.1 II, with its category under 2.1.1.2), so the same title listed twice
 /// is refused: it would carry two dates for one licence. The titles are kept
 /// in `LicenceTitle`'s order, not as given, so that equality does not depend
-/// on the order they were listed in. The list may
-/// be empty: a State's licence can hold only national licences that are not
-/// Annex 1's (CASA's recreational pilot licence, for one), which belong
-/// downstream, keyed by this licence's identity.
+/// on the order they were listed in. The list may be empty: a State's licence
+/// can hold only national licences that are not Annex 1's (CASA's recreational
+/// pilot licence, for one), which belong downstream, keyed by this licence's
+/// identity.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(try_from = "LicenceData", into = "LicenceData")]
 pub struct Licence {

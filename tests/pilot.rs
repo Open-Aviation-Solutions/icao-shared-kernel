@@ -4,8 +4,9 @@
 
 //! Pilot and Licence construction and validation.
 
-use icao_shared_kernel::{Licence, Pilot};
+use icao_shared_kernel::{IssuedTitle, Licence, LicenceTitle, Pilot, PrivateOrCommercialCategory};
 use rstest::rstest;
+use serde_json::json;
 use time::macros::date;
 use time::Date;
 use uuid::Uuid;
@@ -18,13 +19,13 @@ fn pilot_creation() {
     let pilot = Pilot::with(Uuid::new_v4(), "John Smith", BORN, vec![licence.clone()]).unwrap();
     assert_eq!(pilot.full_name(), "John Smith");
     assert_eq!(pilot.date_of_birth(), BORN);
-    assert_eq!(pilot.licences, vec![licence]);
+    assert_eq!(pilot.licences(), [licence]);
 }
 
 #[test]
 fn defaults_to_no_licences() {
     let pilot = Pilot::new("John Smith", BORN).unwrap();
-    assert!(pilot.licences.is_empty());
+    assert!(pilot.licences().is_empty());
 }
 
 #[test]
@@ -40,7 +41,7 @@ fn holds_multiple_state_licences() {
     )
     .unwrap();
     let authorities: Vec<_> = pilot
-        .licences
+        .licences()
         .iter()
         .map(|licence| (licence.issuing_state(), licence.issuing_authority()))
         .collect();
@@ -109,4 +110,41 @@ fn licence_validation_rejects_bad_issuing_state(#[case] state: &str) {
 #[case("A".repeat(101))] // above the 100-character maximum
 fn pilot_validation_enforces_full_name_bounds(#[case] full_name: String) {
     assert!(Pilot::new(full_name, BORN).is_err());
+}
+
+// The triple identifies a licence (Annex 1, 5.2.1 I, III and VIII), so two
+// entries for it could give two dates for one title.
+fn private_aeroplane_from(issued: Date) -> Licence {
+    let title = LicenceTitle::Private(PrivateOrCommercialCategory::Aeroplane);
+    Licence::new("AU", "CASA", "12345", vec![IssuedTitle::new(title, issued)]).unwrap()
+}
+
+#[test]
+fn a_pilot_holding_the_same_licence_twice_is_refused() {
+    let error = Pilot::with(
+        Uuid::new_v4(),
+        "Jane Citizen",
+        BORN,
+        vec![
+            private_aeroplane_from(date!(2015 - 04 - 01)),
+            private_aeroplane_from(date!(2016 - 04 - 01)),
+        ],
+    )
+    .unwrap_err();
+    assert_eq!(
+        error.to_string(),
+        "licence 12345 (CASA, AU) is listed more than once"
+    );
+}
+
+#[test]
+fn a_pilot_read_with_the_same_licence_twice_is_refused() {
+    let licences = [date!(2015 - 04 - 01), date!(2016 - 04 - 01)].map(private_aeroplane_from);
+    let wire =
+        json!({"full_name": "Jane Citizen", "date_of_birth": "1990-06-15", "licences": licences});
+    let error = serde_json::from_value::<Pilot>(wire).unwrap_err();
+    assert!(
+        error.to_string().contains("is listed more than once"),
+        "{error}"
+    );
 }

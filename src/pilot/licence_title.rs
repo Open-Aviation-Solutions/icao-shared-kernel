@@ -14,7 +14,8 @@ use super::aircraft_category::AircraftCategory;
 use crate::error::ValidationError;
 
 // A licence's own categories of aircraft: a subset of `AircraftCategory`,
-// whose variants they share by name, with the conversions both ways.
+// whose variants they share by name, with the conversion into it and, for
+// the crate, back.
 macro_rules! categories {
     ($(#[$doc:meta])* $name:ident { $($variant:ident),+ }) => {
         $(#[$doc])*
@@ -31,13 +32,12 @@ macro_rules! categories {
             }
         }
 
-        impl TryFrom<AircraftCategory> for $name {
-            type Error = ();
-
-            fn try_from(category: AircraftCategory) -> Result<Self, ()> {
+        impl $name {
+            // `None` for a category not in this subset.
+            pub(crate) fn from_category(category: AircraftCategory) -> Option<Self> {
                 match category {
-                    $(AircraftCategory::$variant => Ok(Self::$variant),)+
-                    _ => Err(()),
+                    $(AircraftCategory::$variant => Some(Self::$variant),)+
+                    _ => None,
                 }
             }
         }
@@ -111,10 +111,16 @@ impl LicenceTitle {
     fn from_parts(kind: LicenceKind, category: AircraftCategory) -> Option<Self> {
         let only = |own: AircraftCategory, title: Self| (category == own).then_some(title);
         match kind {
-            LicenceKind::Private => category.try_into().ok().map(Self::Private),
-            LicenceKind::Commercial => category.try_into().ok().map(Self::Commercial),
+            LicenceKind::Private => {
+                PrivateOrCommercialCategory::from_category(category).map(Self::Private)
+            }
+            LicenceKind::Commercial => {
+                PrivateOrCommercialCategory::from_category(category).map(Self::Commercial)
+            }
             LicenceKind::MultiCrew => only(AircraftCategory::Aeroplane, Self::MultiCrew),
-            LicenceKind::AirlineTransport => category.try_into().ok().map(Self::AirlineTransport),
+            LicenceKind::AirlineTransport => {
+                AirlineTransportCategory::from_category(category).map(Self::AirlineTransport)
+            }
             LicenceKind::Glider => only(AircraftCategory::Glider, Self::Glider),
             LicenceKind::FreeBalloon => only(AircraftCategory::FreeBalloon, Self::FreeBalloon),
         }
