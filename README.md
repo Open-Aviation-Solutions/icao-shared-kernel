@@ -14,7 +14,7 @@ tools, and is the part of them that has no country's rules in it.
 
 ## Status
 
-Early: the version is `0.2.0`. Until `1.0`, the API may change between minor
+Early: the version is `0.1.2`. Until `1.0`, the API may change between minor
 versions, and on `main` a breaking change lands whenever it gives a better API,
 together with the changes its users need.
 
@@ -72,7 +72,7 @@ or in `Cargo.toml`:
 
 ```toml
 [dependencies]
-icao-shared-kernel = "0.2"
+icao-shared-kernel = "0.1"
 ```
 
 To follow `main` instead, depend on it by git and pin a commit with `rev`,
