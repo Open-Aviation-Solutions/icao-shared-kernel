@@ -51,16 +51,29 @@ pub enum ValidationError {
     IssuingState(String),
 
     /// A title of licence and a category of aircraft that Annex 1 does not
-    /// issue together (Annex 1, Chapter 2).
-    #[error("a {licence} is not issued for the {category} category")]
+    /// issue together (Annex 1, 2.3.1, 2.4.1, 2.5, 2.6.3 to 2.6.5, 2.9 and
+    /// 2.10). The licence is its name: without its category it is no value
+    /// of the public API, as a `LicenceTitle` always holds one.
+    #[error("the {licence} is not issued for the {category} category")]
     LicenceCategory {
         licence: &'static str,
         category: AircraftCategory,
     },
 
-    /// The same title of licence listed twice under one licence.
+    /// The same title of licence listed twice under one licence: each is one
+    /// licence (Annex 1, 5.2.1 II, with its category under 2.1.1.2), with one
+    /// date of first issue.
     #[error("{0} is listed more than once")]
     RepeatedLicenceTitle(LicenceTitle),
+
+    /// The same licence, by its identity (Annex 1, 5.2.1 I, III and VIII: its
+    /// State, serial number and issuing authority), held twice by one pilot.
+    #[error("licence {number} ({issuing_authority}, {issuing_state}) is listed more than once")]
+    RepeatedLicence {
+        issuing_state: String,
+        issuing_authority: String,
+        number: String,
+    },
 
     /// A validity period whose end date precedes its start date.
     #[error("valid_until {until} must not precede valid_from {from}")]

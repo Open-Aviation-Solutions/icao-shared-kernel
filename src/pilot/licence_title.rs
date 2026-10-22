@@ -13,23 +13,47 @@ use time::Date;
 use super::aircraft_category::AircraftCategory;
 use crate::error::ValidationError;
 
-/// The categories of aircraft a private or a commercial pilot licence is issued
-/// for (Annex 1, 2.3.1 and 2.4.1).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum PrivateOrCommercialCategory {
-    Aeroplane,
-    Airship,
-    Helicopter,
-    PoweredLift,
+// A licence's own categories of aircraft: a subset of `AircraftCategory`,
+// whose variants they share by name, with the conversions both ways.
+macro_rules! categories {
+    ($(#[$doc:meta])* $name:ident { $($variant:ident),+ }) => {
+        $(#[$doc])*
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+        pub enum $name {
+            $($variant),+
+        }
+
+        impl From<$name> for AircraftCategory {
+            fn from(category: $name) -> Self {
+                match category {
+                    $($name::$variant => Self::$variant),+
+                }
+            }
+        }
+
+        impl TryFrom<AircraftCategory> for $name {
+            type Error = ();
+
+            fn try_from(category: AircraftCategory) -> Result<Self, ()> {
+                match category {
+                    $(AircraftCategory::$variant => Ok(Self::$variant),)+
+                    _ => Err(()),
+                }
+            }
+        }
+    };
 }
 
-/// The categories of aircraft an airline transport pilot licence is issued for
-/// (Annex 1, 2.6.3 to 2.6.5).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum AirlineTransportCategory {
-    Aeroplane,
-    Helicopter,
-    PoweredLift,
+categories! {
+    /// The categories of aircraft a private or a commercial pilot licence is
+    /// issued for (Annex 1, 2.3.1 and 2.4.1).
+    PrivateOrCommercialCategory { Aeroplane, Airship, Helicopter, PoweredLift }
+}
+
+categories! {
+    /// The categories of aircraft an airline transport pilot licence is issued
+    /// for (Annex 1, 2.6.3 to 2.6.5).
+    AirlineTransportCategory { Aeroplane, Helicopter, PoweredLift }
 }
 
 /// The title of a pilot licence (Annex 1, 5.2.1 II), with the category of
@@ -43,7 +67,7 @@ pub enum AirlineTransportCategory {
 /// licence that is a State's own and not Annex 1's (CASA's recreational pilot
 /// licence, for one) is not here: it belongs downstream, keyed by the
 /// [`Licence`](crate::Licence)'s identity.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum LicenceTitle {
     /// Private pilot licence (2.3).
     Private(PrivateOrCommercialCategory),
@@ -63,18 +87,9 @@ impl LicenceTitle {
     /// The category of aircraft the licence is for.
     pub fn category(self) -> AircraftCategory {
         match self {
-            Self::Private(category) | Self::Commercial(category) => match category {
-                PrivateOrCommercialCategory::Aeroplane => AircraftCategory::Aeroplane,
-                PrivateOrCommercialCategory::Airship => AircraftCategory::Airship,
-                PrivateOrCommercialCategory::Helicopter => AircraftCategory::Helicopter,
-                PrivateOrCommercialCategory::PoweredLift => AircraftCategory::PoweredLift,
-            },
+            Self::Private(category) | Self::Commercial(category) => category.into(),
             Self::MultiCrew => AircraftCategory::Aeroplane,
-            Self::AirlineTransport(category) => match category {
-                AirlineTransportCategory::Aeroplane => AircraftCategory::Aeroplane,
-                AirlineTransportCategory::Helicopter => AircraftCategory::Helicopter,
-                AirlineTransportCategory::PoweredLift => AircraftCategory::PoweredLift,
-            },
+            Self::AirlineTransport(category) => category.into(),
             Self::Glider => AircraftCategory::Glider,
             Self::FreeBalloon => AircraftCategory::FreeBalloon,
         }
@@ -94,27 +109,14 @@ impl LicenceTitle {
     // The inverse of `kind` and `category`: `None` for a combination Annex 1
     // does not issue.
     fn from_parts(kind: LicenceKind, category: AircraftCategory) -> Option<Self> {
-        use AircraftCategory as C;
-        let private_or_commercial = match category {
-            C::Aeroplane => Some(PrivateOrCommercialCategory::Aeroplane),
-            C::Airship => Some(PrivateOrCommercialCategory::Airship),
-            C::Helicopter => Some(PrivateOrCommercialCategory::Helicopter),
-            C::PoweredLift => Some(PrivateOrCommercialCategory::PoweredLift),
-            C::FreeBalloon | C::Glider => None,
-        };
-        let airline_transport = match category {
-            C::Aeroplane => Some(AirlineTransportCategory::Aeroplane),
-            C::Helicopter => Some(AirlineTransportCategory::Helicopter),
-            C::PoweredLift => Some(AirlineTransportCategory::PoweredLift),
-            C::Airship | C::FreeBalloon | C::Glider => None,
-        };
+        let only = |own: AircraftCategory, title: Self| (category == own).then_some(title);
         match kind {
-            LicenceKind::Private => private_or_commercial.map(Self::Private),
-            LicenceKind::Commercial => private_or_commercial.map(Self::Commercial),
-            LicenceKind::MultiCrew => (category == C::Aeroplane).then_some(Self::MultiCrew),
-            LicenceKind::AirlineTransport => airline_transport.map(Self::AirlineTransport),
-            LicenceKind::Glider => (category == C::Glider).then_some(Self::Glider),
-            LicenceKind::FreeBalloon => (category == C::FreeBalloon).then_some(Self::FreeBalloon),
+            LicenceKind::Private => category.try_into().ok().map(Self::Private),
+            LicenceKind::Commercial => category.try_into().ok().map(Self::Commercial),
+            LicenceKind::MultiCrew => only(AircraftCategory::Aeroplane, Self::MultiCrew),
+            LicenceKind::AirlineTransport => category.try_into().ok().map(Self::AirlineTransport),
+            LicenceKind::Glider => only(AircraftCategory::Glider, Self::Glider),
+            LicenceKind::FreeBalloon => only(AircraftCategory::FreeBalloon, Self::FreeBalloon),
         }
     }
 }

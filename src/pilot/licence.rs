@@ -31,8 +31,11 @@ use crate::error::{check_issuing_state, check_non_empty, ValidationError};
 /// `titles` is a list because a State can hold several licences under one
 /// number, each first issued on its own date: a private licence for aeroplanes
 /// and, later, a commercial one, or a licence for an additional category of
-/// aircraft endorsed on the original (2.1.1.2.1 b)). The same title listed
-/// twice is refused, as it could carry two dates for one licence. The list may
+/// aircraft endorsed on the original (2.1.1.2.1 b)). Each title is one licence
+/// (5.2.1 II, with its category under 2.1.1.2), so the same title listed twice
+/// is refused: it would carry two dates for one licence. The titles are kept
+/// in `LicenceTitle`'s order, not as given, so that equality does not depend
+/// on the order they were listed in. The list may
 /// be empty: a State's licence can hold only national licences that are not
 /// Annex 1's (CASA's recreational pilot licence, for one), which belong
 /// downstream, keyed by this licence's identity.
@@ -53,7 +56,7 @@ impl Licence {
         issuing_state: impl Into<String>,
         issuing_authority: impl Into<String>,
         number: impl Into<String>,
-        titles: Vec<IssuedTitle>,
+        mut titles: Vec<IssuedTitle>,
     ) -> Result<Self, ValidationError> {
         let issuing_state = issuing_state.into();
         let issuing_authority = issuing_authority.into();
@@ -61,13 +64,12 @@ impl Licence {
         check_issuing_state(&issuing_state)?;
         check_non_empty("issuing_authority", &issuing_authority)?;
         check_non_empty("number", &number)?;
-        for (index, title) in titles.iter().enumerate() {
-            if titles[..index]
-                .iter()
-                .any(|earlier| earlier.title == title.title)
-            {
-                return Err(ValidationError::RepeatedLicenceTitle(title.title));
-            }
+        titles.sort_by_key(|issued| issued.title);
+        if let Some(pair) = titles
+            .windows(2)
+            .find(|pair| pair[0].title == pair[1].title)
+        {
+            return Err(ValidationError::RepeatedLicenceTitle(pair[0].title));
         }
         Ok(Self {
             issuing_state,
@@ -92,7 +94,9 @@ impl Licence {
         &self.number
     }
 
-    /// The titles of licence held under this licence, in the order given.
+    /// The titles of licence held under this licence, in `LicenceTitle`'s
+    /// order: the order they were given in means nothing, so it is not kept,
+    /// and two licences holding the same titles are equal however listed.
     pub fn titles(&self) -> &[IssuedTitle] {
         &self.titles
     }

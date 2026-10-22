@@ -5,12 +5,13 @@
 //! The titles of licence held under a licence, and their dates of first issue.
 
 use icao_shared_kernel::{
-    AircraftCategory, IssuedTitle, Licence, LicenceTitle, PrivateOrCommercialCategory,
+    AircraftCategory, IssuedTitle, Licence, LicenceTitle, Pilot, PrivateOrCommercialCategory,
     ValidationError,
 };
 use rstest::rstest;
 use serde_json::json;
 use time::macros::date;
+use uuid::Uuid;
 
 fn private_aeroplane() -> LicenceTitle {
     LicenceTitle::Private(PrivateOrCommercialCategory::Aeroplane)
@@ -147,4 +148,54 @@ fn a_title_annex_1_does_not_issue_is_refused(#[case] licence: &str, #[case] cate
         json!({"licence": licence, "category": category, "date_of_first_issue": "2015-04-01"});
     let error = serde_json::from_value::<IssuedTitle>(wire).unwrap_err();
     assert!(error.to_string().contains("is not issued for"), "{error}");
+}
+
+#[test]
+fn a_title_annex_1_does_not_issue_is_named_in_full() {
+    let wire = json!({"licence": "airline-transport", "category": "airship", "date_of_first_issue": "2015-04-01"});
+    let error = serde_json::from_value::<IssuedTitle>(wire).unwrap_err();
+    assert_eq!(
+        error.to_string(),
+        "the airline transport pilot licence is not issued for the airship category"
+    );
+}
+
+#[test]
+fn the_order_titles_are_listed_in_does_not_matter() {
+    let private = IssuedTitle::new(private_aeroplane(), date!(2015 - 04 - 01));
+    let glider = IssuedTitle::new(LicenceTitle::Glider, date!(2016 - 04 - 01));
+    let licence = |titles| Licence::new("AU", "CASA", "12345", titles).unwrap();
+    assert_eq!(
+        licence(vec![private.clone(), glider.clone()]),
+        licence(vec![glider, private])
+    );
+}
+
+#[test]
+fn a_pilot_holding_the_same_licence_twice_is_refused() {
+    // The triple identifies a licence (Annex 1, 5.2.1 I, III and VIII), so two
+    // entries for it could give two dates for one title.
+    let licence = |issued| {
+        Licence::new(
+            "AU",
+            "CASA",
+            "12345",
+            vec![IssuedTitle::new(private_aeroplane(), issued)],
+        )
+        .unwrap()
+    };
+    let error = Pilot::with(
+        Uuid::new_v4(),
+        "Jane Citizen",
+        date!(1990 - 06 - 15),
+        vec![
+            licence(date!(2015 - 04 - 01)),
+            licence(date!(2016 - 04 - 01)),
+        ],
+    )
+    .unwrap_err();
+    assert_eq!(
+        error.to_string(),
+        "licence 12345 (CASA, AU) is listed more than once"
+    );
 }
