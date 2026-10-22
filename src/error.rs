@@ -13,6 +13,8 @@ use rust_decimal::Decimal;
 use thiserror::Error;
 use time::Date;
 
+use crate::pilot::{AircraftCategory, LicenceTitle};
+
 /// Every way a domain value object can fail to validate.
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum ValidationError {
@@ -47,6 +49,18 @@ pub enum ValidationError {
     /// An issuing state that is not a two-letter ISO 3166-1 alpha-2 code.
     #[error("issuing_state '{0}' must be a two-letter ISO 3166-1 alpha-2 code")]
     IssuingState(String),
+
+    /// A title of licence and a category of aircraft that Annex 1 does not
+    /// issue together (Annex 1, Chapter 2).
+    #[error("a {licence} is not issued for the {category} category")]
+    LicenceCategory {
+        licence: &'static str,
+        category: AircraftCategory,
+    },
+
+    /// The same title of licence listed twice under one licence.
+    #[error("{0} is listed more than once")]
+    RepeatedLicenceTitle(LicenceTitle),
 
     /// A validity period whose end date precedes its start date.
     #[error("valid_until {until} must not precede valid_from {from}")]

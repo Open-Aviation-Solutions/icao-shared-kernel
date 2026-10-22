@@ -4,9 +4,15 @@
 
 //! The `Pilot` aggregate root and the licences it holds.
 
+mod aircraft_category;
 mod licence;
+mod licence_title;
 
+pub use aircraft_category::AircraftCategory;
 pub use licence::Licence;
+pub use licence_title::{
+    AirlineTransportCategory, IssuedTitle, LicenceTitle, PrivateOrCommercialCategory,
+};
 
 use serde::{Deserialize, Serialize};
 use time::Date;

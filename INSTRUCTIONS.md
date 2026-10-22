@@ -47,7 +47,8 @@ test alongside it and record the regulatory basis in the doc comment.
   directory of the same name holding its value-object submodules
   (`flight/waypoint.rs`, `flight/coordinate.rs`, `flight/significant_point.rs`,
   `flight/flight_duration.rs`, `flight/flight_rules.rs`; `aircraft/aircraft_type.rs`,
-  `aircraft/registration.rs`; `pilot/licence.rs`; `fstd/designation.rs`,
+  `aircraft/registration.rs`; `pilot/licence.rs`, `pilot/licence_title.rs`,
+  `pilot/aircraft_category.rs`; `fstd/designation.rs`,
   `fstd/qualification.rs`). An aggregate with no value objects of its own has
   no sibling directory (`fstd_session.rs`). `lib.rs` re-exports the value
   objects so the public API stays flat.

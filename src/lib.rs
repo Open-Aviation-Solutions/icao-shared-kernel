@@ -36,7 +36,10 @@ pub use flight::waypoint::{validate_waypoint_code, Waypoint};
 pub use flight::Flight;
 pub use fstd::{DeviceDesignation, DeviceQualification, FlightSimulationTrainingDevice, FstdKind};
 pub use fstd_session::FstdSession;
-pub use pilot::{Licence, Pilot};
+pub use pilot::{
+    AircraftCategory, AirlineTransportCategory, IssuedTitle, Licence, LicenceTitle, Pilot,
+    PrivateOrCommercialCategory,
+};
 
 // Compiles and runs the README's examples with the doc tests.
 #[cfg(doctest)]
