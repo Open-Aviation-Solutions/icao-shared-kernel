@@ -37,8 +37,8 @@ pub use flight::Flight;
 pub use fstd::{DeviceDesignation, DeviceQualification, FlightSimulationTrainingDevice, FstdKind};
 pub use fstd_session::FstdSession;
 pub use pilot::{
-    AircraftCategory, AirlineTransportCategory, IssuedTitle, Licence, LicenceTitle, Pilot,
-    PrivateOrCommercialCategory,
+    AircraftCategory, AirlineTransportCategory, IssuedTitle, Licence, LicenceTitle, MinimumAges,
+    Pilot, PrivateOrCommercialCategory,
 };
 
 // Compiles and runs the README's examples with the doc tests.

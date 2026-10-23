@@ -7,16 +7,18 @@
 mod aircraft_category;
 mod licence;
 mod licence_title;
+mod minimum_ages;
 
 pub use aircraft_category::AircraftCategory;
 pub use licence::Licence;
 pub use licence_title::{
     AirlineTransportCategory, IssuedTitle, LicenceTitle, PrivateOrCommercialCategory,
 };
+pub use minimum_ages::MinimumAges;
 
 use std::collections::HashSet;
 
-use serde::{Deserialize, Serialize};
+use serde::{de, Deserialize, Deserializer, Serialize};
 use time::Date;
 use uuid::Uuid;
 
@@ -31,6 +33,15 @@ use crate::error::{check_length, ValidationError};
 ///
 /// A pilot can hold licences from multiple States simultaneously (ICAO Annex 1
 /// imposes no single-State restriction).
+///
+/// No title of licence the pilot holds may have been first issued before they
+/// reached its minimum age (see [`MinimumAges`]). [`Pilot::with`] and plain
+/// `Deserialize` check Annex 1's ages; a State whose ages differ builds with
+/// [`Pilot::with_minimum_ages`] and reads with [`Pilot::deserialize_with`],
+/// passing its own table. Read with plain `Deserialize`, a pilot of a State
+/// whose age is below Annex 1's is refused, which is seen at once; one of a
+/// State whose age is above Annex 1's is accepted when the State's own age
+/// would refuse them, which is not.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(try_from = "PilotData", into = "PilotData")]
 pub struct Pilot {
@@ -54,13 +65,35 @@ impl Pilot {
     /// The same licence, by its identity, is refused if listed twice: two
     /// entries could disagree on its titles and their dates.
     ///
+    /// No title of licence may have been first issued before the holder
+    /// reached Annex 1's minimum age for it ([`MinimumAges::default`]).
+    ///
     /// The date of birth is not checked against today: the kernel has no
-    /// clock, so that is for a consumer that has one.
+    /// clock, so that is for a consumer that has one. Nor is a title's date
+    /// checked against today, or against the other titles' dates.
     pub fn with(
         id: Uuid,
         full_name: impl Into<String>,
         date_of_birth: Date,
         licences: Vec<Licence>,
+    ) -> Result<Self, ValidationError> {
+        Self::with_minimum_ages(
+            id,
+            full_name,
+            date_of_birth,
+            licences,
+            &MinimumAges::default(),
+        )
+    }
+
+    /// Build a pilot as [`Pilot::with`] does, checking each title's date of
+    /// first issue against a State's own minimum ages in place of Annex 1's.
+    pub fn with_minimum_ages(
+        id: Uuid,
+        full_name: impl Into<String>,
+        date_of_birth: Date,
+        licences: Vec<Licence>,
+        minimum_ages: &MinimumAges,
     ) -> Result<Self, ValidationError> {
         let full_name = full_name.into().trim().to_owned();
         check_length("full_name", &full_name, 1, 100)?;
@@ -78,6 +111,22 @@ impl Pilot {
                 issuing_authority: licence.issuing_authority().to_owned(),
                 number: licence.number().to_owned(),
             });
+        }
+        for licence in &licences {
+            for issued in licence.titles() {
+                let minimum_age = minimum_ages.for_title(issued.title);
+                let age = minimum_ages::age_on(date_of_birth, issued.date_of_first_issue);
+                if age < i32::from(minimum_age) {
+                    return Err(ValidationError::UnderMinimumAge {
+                        issuing_state: licence.issuing_state().to_owned(),
+                        issuing_authority: licence.issuing_authority().to_owned(),
+                        number: licence.number().to_owned(),
+                        title: issued.title,
+                        minimum_age,
+                        date_of_first_issue: issued.date_of_first_issue,
+                    });
+                }
+            }
         }
         Ok(Self {
             id,
@@ -100,6 +149,44 @@ impl Pilot {
     /// The licences the pilot holds, no two with the same identity.
     pub fn licences(&self) -> &[Licence] {
         &self.licences
+    }
+
+    /// Read a pilot from any serde deserializer, checking each title's date of
+    /// first issue against a State's own minimum ages, as
+    /// [`Pilot::with_minimum_ages`] does. The wire shape is plain
+    /// `Deserialize`'s, and so is the error: a serde error carrying the
+    /// [`ValidationError`]'s message.
+    ///
+    /// ```
+    /// use icao_shared_kernel::{MinimumAges, Pilot};
+    ///
+    /// let ages = MinimumAges { private: 16, ..MinimumAges::default() };
+    /// let json = r#"{
+    ///     "full_name": "Jane Citizen",
+    ///     "date_of_birth": "2000-01-01",
+    ///     "licences": [{
+    ///         "issuing_state": "AU", "issuing_authority": "CASA", "number": "12345",
+    ///         "titles": [{"licence": "private", "category": "aeroplane",
+    ///                     "date_of_first_issue": "2016-06-01"}]
+    ///     }]
+    /// }"#;
+    /// let mut deserializer = serde_json::Deserializer::from_str(json);
+    /// assert!(Pilot::deserialize_with(&mut deserializer, &ages).is_ok());
+    /// assert!(serde_json::from_str::<Pilot>(json).is_err());
+    /// ```
+    pub fn deserialize_with<'de, D: Deserializer<'de>>(
+        deserializer: D,
+        minimum_ages: &MinimumAges,
+    ) -> Result<Self, D::Error> {
+        let data = PilotData::deserialize(deserializer)?;
+        Self::with_minimum_ages(
+            data.id,
+            data.full_name,
+            data.date_of_birth,
+            data.licences,
+            minimum_ages,
+        )
+        .map_err(de::Error::custom)
     }
 }
 

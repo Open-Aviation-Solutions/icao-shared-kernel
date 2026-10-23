@@ -24,7 +24,8 @@ What is covered:
   designator *or* a latitude and longitude), `FlightDuration`, `FlightRules`,
   `AircraftType`, `AircraftRegistration`, `Licence` (with the titles of
   licence held under it: `IssuedTitle`, `LicenceTitle` and its categories,
-  `AircraftCategory`), `FstdKind`,
+  `AircraftCategory`), `MinimumAges` (the minimum age for each title of
+  licence, Annex 1's by default), `FstdKind`,
   `DeviceDesignation`, `DeviceQualification`, and the public `validate_waypoint_code` function.
 - Aggregates: `Flight`, `Aircraft`, `Pilot`, `FlightSimulationTrainingDevice`
   and `FstdSession`.
