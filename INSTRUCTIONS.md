@@ -48,7 +48,7 @@ test alongside it and record the regulatory basis in the doc comment.
   (`flight/waypoint.rs`, `flight/coordinate.rs`, `flight/significant_point.rs`,
   `flight/flight_duration.rs`, `flight/flight_rules.rs`; `aircraft/aircraft_type.rs`,
   `aircraft/registration.rs`; `pilot/licence.rs`, `pilot/licence_title.rs`,
-  `pilot/aircraft_category.rs`; `fstd/designation.rs`,
+  `pilot/aircraft_category.rs`, `pilot/minimum_ages.rs`; `fstd/designation.rs`,
   `fstd/qualification.rs`). An aggregate with no value objects of its own has
   no sibling directory (`fstd_session.rs`). `lib.rs` re-exports the value
   objects so the public API stays flat.
@@ -60,9 +60,10 @@ this crate. `au-casa` does not yet, but its simulator classification (its task
 `0002`) will build on the FSTD aggregates.
 
 Choose the best API, not the compatible one: while the crate is on `0.x`, a
-breaking change is fine, landed with a matching PR in each consumer. Releases
-follow semver for `0.x`: a release with a breaking change bumps the minor
-version.
+breaking change is fine, landed with a matching PR in each consumer. While on
+`0.x`, every release bumps the patch version, a breaking one included, to keep
+the numbers low: consumers pin the version exactly (`=0.1.3`), so a cargo
+update never takes a new release, breaking or not, until they move the pin.
 
 ## Releasing
 

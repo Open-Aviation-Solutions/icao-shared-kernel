@@ -139,10 +139,9 @@ impl fmt::Display for LicenceTitle {
 /// `date_of_first_issue` is that date, not the date of the latest document
 /// (the date of such issue, 5.2.1 X): a reissued document carries a later
 /// date, which would make "held the licence on date X" wrong for the dates
-/// between. It is not checked against today, as the kernel has no clock, nor
-/// against the holder's date of birth: Annex 1 sets a minimum age for each
-/// licence (2.3.1.1, 2.4.1.1, 2.5.1.1, 2.6.1.1, 2.9.1.1, 2.10.1.1), but a State
-/// may differ from a Standard, so an age rule is for a consumer to apply.
+/// between. It is not checked against today, as the kernel has no clock. The
+/// [`Pilot`](crate::Pilot) holding it checks it against their date of birth
+/// and the title's minimum age (see [`MinimumAges`](crate::MinimumAges)).
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(try_from = "IssuedTitleData", into = "IssuedTitleData")]
 pub struct IssuedTitle {

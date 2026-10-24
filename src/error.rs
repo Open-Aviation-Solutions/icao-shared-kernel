@@ -75,6 +75,22 @@ pub enum ValidationError {
         number: String,
     },
 
+    /// A title of licence first issued before the holder reached its minimum
+    /// age: Annex 1's (2.3.1.1, 2.4.1.1, 2.5.1.1, 2.6.1.1, 2.9.1.1 and
+    /// 2.10.1.1), or a State's own (`MinimumAges`).
+    #[error(
+        "{title} under licence {number} ({issuing_authority}, {issuing_state}) was first issued \
+         on {date_of_first_issue}, before the holder was {minimum_age}"
+    )]
+    UnderMinimumAge {
+        issuing_state: String,
+        issuing_authority: String,
+        number: String,
+        title: LicenceTitle,
+        minimum_age: u8,
+        date_of_first_issue: Date,
+    },
+
     /// A validity period whose end date precedes its start date.
     #[error("valid_until {until} must not precede valid_from {from}")]
     ValidityPeriod { from: Date, until: Date },

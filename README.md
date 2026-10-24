@@ -14,9 +14,10 @@ tools, and is the part of them that has no country's rules in it.
 
 ## Status
 
-Early: the version is `0.1.2`. Until `1.0`, the API may change between minor
-versions, and on `main` a breaking change lands whenever it gives a better API,
-together with the changes its users need.
+Early: the version is `0.1.3`. Until `1.0`, the API may change between any two
+versions, patch releases included, so pin the version exactly. On `main` a
+breaking change lands whenever it gives a better API, together with the changes
+its users need.
 
 What is covered:
 
@@ -24,7 +25,8 @@ What is covered:
   designator *or* a latitude and longitude), `FlightDuration`, `FlightRules`,
   `AircraftType`, `AircraftRegistration`, `Licence` (with the titles of
   licence held under it: `IssuedTitle`, `LicenceTitle` and its categories,
-  `AircraftCategory`), `FstdKind`,
+  `AircraftCategory`), `MinimumAges` (the minimum age for each title of
+  licence, Annex 1's by default), `FstdKind`,
   `DeviceDesignation`, `DeviceQualification`, and the public `validate_waypoint_code` function.
 - Aggregates: `Flight`, `Aircraft`, `Pilot`, `FlightSimulationTrainingDevice`
   and `FstdSession`.
@@ -45,7 +47,7 @@ Known limits:
   against ISO 3166-1; a waypoint's designator is not checked against any
   State's published list.
 - The types serialise with serde, but that JSON is not a stored format that is
-  promised: it may change between minor versions, as the API may.
+  promised: it may change between versions, as the API may.
 
 Nothing else is known not to work. The open
 [issues](https://github.com/Open-Aviation-Solutions/icao-shared-kernel/issues)
