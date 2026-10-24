@@ -60,9 +60,10 @@ this crate. `au-casa` does not yet, but its simulator classification (its task
 `0002`) will build on the FSTD aggregates.
 
 Choose the best API, not the compatible one: while the crate is on `0.x`, a
-breaking change is fine, landed with a matching PR in each consumer. Releases
-follow semver for `0.x`: a release with a breaking change bumps the minor
-version.
+breaking change is fine, landed with a matching PR in each consumer. While on
+`0.x`, every release bumps the patch version, a breaking one included, to keep
+the numbers low: consumers pin the version exactly (`=0.1.3`), so a cargo
+update never takes a new release, breaking or not, until they move the pin.
 
 ## Releasing
 
