@@ -167,8 +167,9 @@ fn a_higher_age_refuses_what_annex_1_accepts() {
         }
     ));
     let read = Pilot::deserialize_with(wire(BORN, title, issued), &ages).unwrap_err();
-    assert!(
-        read.to_string().contains("before the holder was 19"),
-        "{read}"
+    assert_eq!(
+        read.to_string(),
+        "commercial pilot licence (aeroplane) under licence 12345 (CASA, AU) was first issued \
+         on 2018-06-15, before the holder was 19"
     );
 }

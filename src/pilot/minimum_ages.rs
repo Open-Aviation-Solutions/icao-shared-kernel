@@ -28,7 +28,7 @@ use super::licence_title::LicenceTitle;
 /// Annex 1 sets the age as a requirement on the applicant. The kernel checks
 /// it against the date the title was first issued, which comes after the
 /// application, so the check can miss an applicant who was too young when
-/// they applied, but never refuses a valid licence.
+/// they applied, though not one who was too young when the title was issued.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct MinimumAges {
     /// Private pilot licence (2.3.1.1).

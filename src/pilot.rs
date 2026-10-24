@@ -41,7 +41,10 @@ use crate::error::{check_length, ValidationError};
 /// passing its own table. Read with plain `Deserialize`, a pilot of a State
 /// whose age is below Annex 1's is refused, which is seen at once; one of a
 /// State whose age is above Annex 1's is accepted when the State's own age
-/// would refuse them, which is not.
+/// would refuse them, which is not. A pilot does not keep the table it was
+/// checked against: one built with a State's lower ages serialises to JSON
+/// that plain `Deserialize` refuses, and a type that embeds a `Pilot` with
+/// derived `Deserialize` checks it against Annex 1's ages.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(try_from = "PilotData", into = "PilotData")]
 pub struct Pilot {
@@ -172,21 +175,17 @@ impl Pilot {
     /// }"#;
     /// let mut deserializer = serde_json::Deserializer::from_str(json);
     /// assert!(Pilot::deserialize_with(&mut deserializer, &ages).is_ok());
+    /// // As `serde_json::from_str` does, refuse anything after the pilot.
+    /// deserializer.end().unwrap();
     /// assert!(serde_json::from_str::<Pilot>(json).is_err());
     /// ```
     pub fn deserialize_with<'de, D: Deserializer<'de>>(
         deserializer: D,
         minimum_ages: &MinimumAges,
     ) -> Result<Self, D::Error> {
-        let data = PilotData::deserialize(deserializer)?;
-        Self::with_minimum_ages(
-            data.id,
-            data.full_name,
-            data.date_of_birth,
-            data.licences,
-            minimum_ages,
-        )
-        .map_err(de::Error::custom)
+        PilotData::deserialize(deserializer)?
+            .into_pilot(minimum_ages)
+            .map_err(de::Error::custom)
     }
 }
 
@@ -205,11 +204,23 @@ struct PilotData {
     licences: Vec<Licence>,
 }
 
+impl PilotData {
+    fn into_pilot(self, minimum_ages: &MinimumAges) -> Result<Pilot, ValidationError> {
+        Pilot::with_minimum_ages(
+            self.id,
+            self.full_name,
+            self.date_of_birth,
+            self.licences,
+            minimum_ages,
+        )
+    }
+}
+
 impl TryFrom<PilotData> for Pilot {
     type Error = ValidationError;
 
     fn try_from(data: PilotData) -> Result<Self, Self::Error> {
-        Self::with(data.id, data.full_name, data.date_of_birth, data.licences)
+        data.into_pilot(&MinimumAges::default())
     }
 }
 
