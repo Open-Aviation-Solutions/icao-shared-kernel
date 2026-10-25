@@ -55,9 +55,10 @@ test alongside it and record the regulatory basis in the doc comment.
 
 ## Consumers
 
-`pilot-logbook` and `icao-shared-kernel-py` (the Python bindings) depend on
-this crate. `au-casa` does not yet, but its simulator classification (its task
-`0002`) will build on the FSTD aggregates.
+`pilot-logbook`, `icao-shared-kernel-py` (the Python bindings) and `au-casa`
+depend on this crate; au-casa takes `LicenceTitle` for its titles of licence,
+and its simulator classification (its task `0002`) is to build on the FSTD
+aggregates.
 
 Choose the best API, not the compatible one: while the crate is on `0.x`, a
 breaking change is fine, landed with a matching PR in each consumer.
