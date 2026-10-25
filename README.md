@@ -14,8 +14,11 @@ tools, and is the part of them that has no country's rules in it.
 
 ## Status
 
-Early: the version is `0.1.3`. Until `1.0`, the API may change between any two
-versions, patch releases included, so pin the version exactly. On `main` a
+Early: the version is `0.1.3`. Until `1.0`, a release that breaks the API, or
+could change a title of licence, bumps the minor version and a compatible one
+the patch, so take it by a caret range (`"0.1"`) and a cargo update takes no
+breaking release. Releases up to `0.1.3` bumped only the patch, breaking ones
+included. On `main` a
 breaking change lands whenever it gives a better API, together with the changes
 its users need.
 
