@@ -65,8 +65,8 @@ breaking change is fine, landed with a matching PR in each consumer.
 
 While on `0.x`, a breaking release bumps the minor version (`0.2.0`), and a
 compatible one the patch. Breaking includes a change to the API and any change
-that could alter what a consumer derives from the crate, such as a change
-that could alter a title of licence (`LicenceTitle`). Consumers
+that could alter what a consumer derives from the crate, such as a
+classification it makes or a title of licence (`LicenceTitle`). Consumers
 take the crate by a caret range (`^0.1.3`), not pinned exactly, so that a
 build with several of them (au-casa, its sibling country crates and a logbook
 using them) has one copy of the crate and its types are the same in each; a

@@ -14,11 +14,10 @@ tools, and is the part of them that has no country's rules in it.
 
 ## Status
 
-Early: the version is `0.1.3`. Until `1.0`, a release that breaks the API, or
-could change a title of licence, bumps the minor version and a compatible one
-the patch, so take it by a caret range (`"0.1"`) and a cargo update takes no
-breaking release. Releases up to `0.1.3` bumped only the patch, breaking ones
-included. On `main` a
+Early: the version is `0.1.3`. Take it by a caret range from that version
+(`"0.1.3"`): until `1.0` a breaking release is a minor version, as
+[`INSTRUCTIONS.md`, "Consumers"](INSTRUCTIONS.md#consumers) sets out, though
+releases up to `0.1.3` broke each other as patches. On `main` a
 breaking change lands whenever it gives a better API, together with the changes
 its users need.
 
@@ -77,7 +76,7 @@ or in `Cargo.toml`:
 
 ```toml
 [dependencies]
-icao-shared-kernel = "0.1"
+icao-shared-kernel = "0.1.3"
 ```
 
 To follow `main` instead, depend on it by git and pin a commit with `rev`,
