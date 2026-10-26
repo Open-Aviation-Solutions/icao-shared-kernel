@@ -14,8 +14,10 @@ tools, and is the part of them that has no country's rules in it.
 
 ## Status
 
-Early: the version is `0.1.3`. Until `1.0`, the API may change between any two
-versions, patch releases included, so pin the version exactly. On `main` a
+Early: the version is `0.1.3`. Take it by a caret range from that version
+(`"0.1.3"`): until `1.0` a breaking release is a minor version, as
+[`INSTRUCTIONS.md`, "Consumers"](INSTRUCTIONS.md#consumers) sets out, though
+releases up to `0.1.3` broke each other as patches. On `main` a
 breaking change lands whenever it gives a better API, together with the changes
 its users need.
 
@@ -74,7 +76,7 @@ or in `Cargo.toml`:
 
 ```toml
 [dependencies]
-icao-shared-kernel = "0.1"
+icao-shared-kernel = "0.1.3"
 ```
 
 To follow `main` instead, depend on it by git and pin a commit with `rev`,

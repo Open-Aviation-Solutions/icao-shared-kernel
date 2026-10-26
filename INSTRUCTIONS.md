@@ -55,15 +55,24 @@ test alongside it and record the regulatory basis in the doc comment.
 
 ## Consumers
 
-`pilot-logbook` and `icao-shared-kernel-py` (the Python bindings) depend on
-this crate. `au-casa` does not yet, but its simulator classification (its task
-`0002`) will build on the FSTD aggregates.
+`pilot-logbook`, `icao-shared-kernel-py` (the Python bindings) and `au-casa`
+depend on this crate; au-casa takes `LicenceTitle` for its titles of licence,
+and its simulator classification (its task `0002`) is to build on the FSTD
+aggregates.
 
 Choose the best API, not the compatible one: while the crate is on `0.x`, a
-breaking change is fine, landed with a matching PR in each consumer. While on
-`0.x`, every release bumps the patch version, a breaking one included, to keep
-the numbers low: consumers pin the version exactly (`=0.1.3`), so a cargo
-update never takes a new release, breaking or not, until they move the pin.
+breaking change is fine, landed with a matching PR in each consumer.
+
+While on `0.x`, a breaking release bumps the minor version (`0.2.0`), and a
+compatible one the patch. Breaking includes a change to the API and any change
+that could alter what a consumer derives from the crate, such as a
+classification it makes or a title of licence (`LicenceTitle`). Consumers
+take the crate by a caret range (`^0.1.3`), not pinned exactly, so that a
+build with several of them (au-casa, its sibling country crates and a logbook
+using them) has one copy of the crate and its types are the same in each; a
+cargo update then takes up patches but not a breaking release, which each
+consumer moves to in a pull request of its own (decided on
+[au-casa#24](https://github.com/Open-Aviation-Solutions/au-casa/issues/24)).
 
 ## Releasing
 
