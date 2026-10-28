@@ -21,7 +21,9 @@ language bindings (PyO3, etc.). Bindings live in their own repositories.
 
 Every value object owns its invariants and is the single place they live. Each
 rule should be justified against an ICAO source (an Annex or Document). A State's
-own rules, such as Australia's CASA Part 61, stay out of this crate.
+own rules, such as Australia's CASA Part 61, stay out of this crate. A term
+ICAO defines is named and documented as ICAO defines it, and a State's
+refinement of it (a narrower or wider version of the same term) stays out.
 
 Each rule is covered by a test in `tests/`. When you change a rule, change its
 test alongside it and record the regulatory basis in the doc comment.
@@ -48,8 +50,8 @@ test alongside it and record the regulatory basis in the doc comment.
   (`flight/waypoint.rs`, `flight/coordinate.rs`, `flight/significant_point.rs`,
   `flight/flight_duration.rs`, `flight/flight_rules.rs`; `aircraft/aircraft_type.rs`,
   `aircraft/registration.rs`; `pilot/licence.rs`, `pilot/licence_title.rs`,
-  `pilot/aircraft_category.rs`, `pilot/minimum_ages.rs`; `fstd/designation.rs`,
-  `fstd/qualification.rs`). An aggregate with no value objects of its own has
+  `pilot/aircraft_category.rs`, `pilot/capacity.rs`, `pilot/minimum_ages.rs`;
+  `fstd/designation.rs`, `fstd/qualification.rs`). An aggregate with no value objects of its own has
   no sibling directory (`fstd_session.rs`). `lib.rs` re-exports the value
   objects so the public API stays flat.
 
