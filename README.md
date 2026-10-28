@@ -2,9 +2,9 @@
 
 A Rust library of the aviation concepts that ICAO defines the same way for
 every State: an aircraft's type designator and registration marks, a pilot's
-licence, a flight between two significant points and the flight rules it was
-flown under, and the flight simulation training devices a session can be
-flown on. Each is a type that cannot hold an invalid value, so code built on
+licence, the capacity a pilot serves in on a flight, a flight between two
+significant points and the flight rules it was flown under, and the flight
+simulation training devices a session can be flown on. Each is a type that cannot hold an invalid value, so code built on
 it does not have to check them again.
 
 It is for developers of aviation software, such as logbooks and training

@@ -47,13 +47,15 @@ test alongside it and record the regulatory basis in the doc comment.
   returning `Result<Self, ValidationError>`; no public way to build an invalid value.
 - Module layout: each aggregate is a module file (`flight.rs`) with a sibling
   directory of the same name holding its value-object submodules
-  (`flight/waypoint.rs`, `flight/coordinate.rs`, `flight/significant_point.rs`,
-  `flight/flight_duration.rs`, `flight/flight_rules.rs`; `aircraft/aircraft_type.rs`,
+  (`flight/waypoint.rs`, `flight/coordinate.rs`,
+  `flight/significant_point.rs`, `flight/flight_duration.rs`,
+  `flight/flight_rules.rs`; `aircraft/aircraft_type.rs`,
   `aircraft/registration.rs`; `pilot/licence.rs`, `pilot/licence_title.rs`,
-  `pilot/aircraft_category.rs`, `pilot/capacity.rs`, `pilot/minimum_ages.rs`;
-  `fstd/designation.rs`, `fstd/qualification.rs`). An aggregate with no value objects of its own has
-  no sibling directory (`fstd_session.rs`). `lib.rs` re-exports the value
-  objects so the public API stays flat.
+  `pilot/aircraft_category.rs`, `pilot/capacity.rs`,
+  `pilot/minimum_ages.rs`; `fstd/designation.rs`, `fstd/qualification.rs`).
+  An aggregate with no value objects of its own has no sibling directory
+  (`fstd_session.rs`). `lib.rs` re-exports the value objects so the public
+  API stays flat.
 
 ## Consumers
 
@@ -69,7 +71,7 @@ While on `0.x`, a breaking release bumps the minor version (`0.2.0`), and a
 compatible one the patch. Breaking includes a change to the API and any change
 that could alter what a consumer derives from the crate, such as a
 classification it makes or a title of licence (`LicenceTitle`). Consumers
-take the crate by a caret range (`^0.1.3`), not pinned exactly, so that a
+take the crate by a caret range (`^0.1.4`), not pinned exactly, so that a
 build with several of them (au-casa, its sibling country crates and a logbook
 using them) has one copy of the crate and its types are the same in each; a
 cargo update then takes up patches but not a breaking release, which each
