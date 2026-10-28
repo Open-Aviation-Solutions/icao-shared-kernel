@@ -2,9 +2,9 @@
 
 A Rust library of the aviation concepts that ICAO defines the same way for
 every State: an aircraft's type designator and registration marks, a pilot's
-licence, a flight between two significant points and the flight rules it was
-flown under, and the flight simulation training devices a session can be
-flown on. Each is a type that cannot hold an invalid value, so code built on
+licence, the capacity a pilot serves in on a flight, a flight between two
+significant points and the flight rules it was flown under, and the flight
+simulation training devices a session can be flown on. Each is a type that cannot hold an invalid value, so code built on
 it does not have to check them again.
 
 It is for developers of aviation software, such as logbooks and training
@@ -14,8 +14,8 @@ tools, and is the part of them that has no country's rules in it.
 
 ## Status
 
-Early: the version is `0.1.3`. Take it by a caret range from that version
-(`"0.1.3"`): until `1.0` a breaking release is a minor version, as
+Early: the version is `0.1.4`. Take it by a caret range from that version
+(`"0.1.4"`): until `1.0` a breaking release is a minor version, as
 [`INSTRUCTIONS.md`, "Consumers"](INSTRUCTIONS.md#consumers) sets out, though
 releases up to `0.1.3` broke each other as patches. On `main` a
 breaking change lands whenever it gives a better API, together with the changes
@@ -27,7 +27,8 @@ What is covered:
   designator *or* a latitude and longitude), `FlightDuration`, `FlightRules`,
   `AircraftType`, `AircraftRegistration`, `Licence` (with the titles of
   licence held under it: `IssuedTitle`, `LicenceTitle` and its categories,
-  `AircraftCategory`), `MinimumAges` (the minimum age for each title of
+  `AircraftCategory`), `Capacity` (the capacity a pilot serves in on a
+  flight, in Annex 1's terms), `MinimumAges` (the minimum age for each title of
   licence, Annex 1's by default), `FstdKind`,
   `DeviceDesignation`, `DeviceQualification`, and the public `validate_waypoint_code` function.
 - Aggregates: `Flight`, `Aircraft`, `Pilot`, `FlightSimulationTrainingDevice`
@@ -64,6 +65,11 @@ meets a State's requirements is not decided here, and nothing in it changes a
 pilot's own responsibility under their State's regulations. A record that this
 crate accepts is well formed, not necessarily correct.
 
+Where a State's version of an ICAO term is narrower or wider than ICAO's (CASA's
+pilot in command under supervision, for one, excludes a student pilot), the
+crate holds ICAO's term and not the State's version, which belongs with that
+State's rules.
+
 ## Using it
 
 Add it from crates.io:
@@ -76,7 +82,7 @@ or in `Cargo.toml`:
 
 ```toml
 [dependencies]
-icao-shared-kernel = "0.1.3"
+icao-shared-kernel = "0.1.4"
 ```
 
 To follow `main` instead, depend on it by git and pin a commit with `rev`,

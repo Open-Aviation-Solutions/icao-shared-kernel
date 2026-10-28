@@ -2,14 +2,16 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-//! The `Pilot` aggregate root and the licences it holds.
+//! The `Pilot` aggregate root, its licences, and a pilot's capacity on a flight.
 
 mod aircraft_category;
+mod capacity;
 mod licence;
 mod licence_title;
 mod minimum_ages;
 
 pub use aircraft_category::AircraftCategory;
+pub use capacity::Capacity;
 pub use licence::Licence;
 pub use licence_title::{
     AirlineTransportCategory, IssuedTitle, LicenceTitle, PrivateOrCommercialCategory,
