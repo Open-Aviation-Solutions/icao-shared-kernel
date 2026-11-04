@@ -66,9 +66,10 @@ pilot's own responsibility under their State's regulations. A record that this
 crate accepts is well formed, not necessarily correct.
 
 Where a State's version of an ICAO term is narrower or wider than ICAO's (CASA's
-pilot in command under supervision, for one, excludes a student pilot), the
-crate holds ICAO's term and not the State's version, which belongs with that
-State's rules.
+pilot in command under supervision, for one, can be supervised under CASR 1998
+reg 61.095(3) by a flight instructor or examiner who need not be the
+pilot-in-command), the crate holds ICAO's term and not the State's version,
+which belongs with that State's rules.
 
 ## Using it
 
