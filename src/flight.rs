@@ -144,7 +144,9 @@ impl Flight {
     /// first. Rounded down to whole minutes.
     pub fn duration(&self) -> Option<FlightDuration> {
         match (self.first_movement, self.last_movement) {
-            (Some(first), Some(last)) => FlightDuration::new((last - first).whole_minutes()).ok(),
+            (Some(first), Some(last)) if last >= first => {
+                FlightDuration::new((last - first).whole_minutes()).ok()
+            }
             _ => None,
         }
     }
