@@ -7,7 +7,8 @@
 use serde::{Deserialize, Serialize};
 
 /// The capacity a pilot serves in on a flight, named by the terms ICAO Annex 1
-/// defines (Chapter 1, 1.1 Definitions).
+/// defines (Fourteenth Edition, Chapter 1, 1.1 Definitions), which each
+/// variant quotes.
 ///
 /// Each variant names ICAO's term, but a record holding it is the pilot's
 /// claim to that capacity *as the logging authority defines it*. It is not an
@@ -26,14 +27,27 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum Capacity {
-    /// Pilot-in-command (Annex 1, 1.1 Definitions, "Pilot-in-command").
+    /// Pilot-in-command: "The pilot designated by the operator, or in the case
+    /// of general aviation, the owner, as being in command and charged with
+    /// the safe conduct of a flight." (Annex 1, 1.1)
     PilotInCommand,
-    /// Co-pilot (Annex 1, 1.1 Definitions, "Co-pilot").
+    /// Co-pilot: "A licensed pilot serving in any piloting capacity other than
+    /// as pilot-in-command but excluding a pilot who is on board the aircraft
+    /// for the sole purpose of receiving flight instruction." (Annex 1, 1.1)
     CoPilot,
-    /// Pilot-in-command under supervision (Annex 1, 1.1 Definitions,
-    /// "Pilot-in-command under supervision").
+    /// Pilot-in-command under supervision: "Co-pilot performing, under the
+    /// supervision of the pilot-in-command, the duties and functions of a
+    /// pilot-in-command, in accordance with a method of supervision acceptable
+    /// to the Licensing Authority." (Annex 1, 1.1)
+    ///
+    /// ICAO's pilot-in-command under supervision is a kind of co-pilot, and is
+    /// recorded as this variant in place of [`Capacity::CoPilot`], so ICAO's
+    /// co-pilot time is the time of both.
     PilotInCommandUnderSupervision,
-    /// Receiving flight instruction: the capacity in which a pilot logs dual
-    /// instruction time (Annex 1, 1.1 Definitions, "Dual instruction time").
+    /// The capacity in which a pilot logs dual instruction time: "Flight time
+    /// during which a person is receiving flight instruction from a properly
+    /// authorized pilot on board the aircraft, or from a properly authorized
+    /// remote pilot using the remote pilot station during a remotely piloted
+    /// aircraft flight." (Annex 1, 1.1, "Dual instruction time")
     DualInstruction,
 }
