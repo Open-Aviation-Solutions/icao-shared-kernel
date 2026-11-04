@@ -55,6 +55,18 @@ fn duration_is_none_when_last_movement_is_before_first() {
 }
 
 #[test]
+fn duration_is_none_when_last_movement_is_seconds_before_first() {
+    let flight = Flight::new(
+        Uuid::new_v4(),
+        SignificantPoint::designator("YSBK").unwrap(),
+        SignificantPoint::designator("YSCN").unwrap(),
+        Some(utc_datetime!(2026-04-19 03:00:30)),
+        Some(utc_datetime!(2026-04-19 03:00:00)),
+    );
+    assert_eq!(flight.duration(), None);
+}
+
+#[test]
 fn display_without_movement_time_omits_date() {
     let flight = Flight::create(Uuid::new_v4(), "YSBK", "YSCN").unwrap();
     assert_eq!(flight.to_string(), "Flight: YSBK-YSCN");

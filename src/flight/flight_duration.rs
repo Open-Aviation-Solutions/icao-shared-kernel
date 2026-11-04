@@ -11,6 +11,12 @@ use crate::error::ValidationError;
 
 /// A flight duration in whole minutes, never negative. Serialises
 /// transparently as a plain integer, and deserialising refuses a negative one.
+///
+/// Never negative because Annex 1 (Chapter 1, the definition of "flight
+/// time") measures it from one moment, when the aircraft first moves for the
+/// purpose of taking off (or, for the other categories, the moment their
+/// definition names), to a later one, when it comes to rest at the end of the
+/// flight: a span from an earlier moment to a later one.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(try_from = "i64")]
 #[serde(into = "i64")]
@@ -20,15 +26,24 @@ impl FlightDuration {
     /// Wrap a total number of minutes, refusing a negative one.
     pub const fn new(total_minutes: i64) -> Result<Self, ValidationError> {
         if total_minutes < 0 {
-            return Err(ValidationError::NegativeDuration(total_minutes));
+            return Err(ValidationError::FlightDuration(total_minutes));
         }
         Ok(Self(total_minutes))
     }
 
     /// Build a duration from whole hours and minutes (e.g. `1h 30m` → 90),
-    /// refusing a negative total.
+    /// refusing a negative total or one too large for `i64`. The components may
+    /// be outside 0..60 for minutes or have mixed signs: only the total is
+    /// checked, so `(2, -90)` is 30 minutes.
     pub const fn from_hours_minutes(hours: i64, minutes: i64) -> Result<Self, ValidationError> {
-        Self::new(hours * 60 + minutes)
+        let total = match hours.checked_mul(60) {
+            Some(hour_minutes) => hour_minutes.checked_add(minutes),
+            None => None,
+        };
+        match total {
+            Some(total_minutes) => Self::new(total_minutes),
+            None => Err(ValidationError::FlightDurationOverflow { hours, minutes }),
+        }
     }
 
     /// The total duration in minutes.

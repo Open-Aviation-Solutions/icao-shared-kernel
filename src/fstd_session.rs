@@ -138,7 +138,9 @@ impl FstdSession {
     /// [`Flight::duration`](crate::Flight::duration).
     pub fn duration(&self) -> Option<FlightDuration> {
         match (self.start, self.end) {
-            (Some(start), Some(end)) => FlightDuration::new((end - start).whole_minutes()).ok(),
+            (Some(start), Some(end)) if end >= start => {
+                FlightDuration::new((end - start).whole_minutes()).ok()
+            }
             _ => None,
         }
     }

@@ -69,14 +69,14 @@ fn serialises_as_int() {
 #[case(-90)]
 #[case(i64::MIN)]
 fn refuses_a_negative_value(#[case] total: i64) {
-    let expected = Err(ValidationError::NegativeDuration(total));
+    let expected = Err(ValidationError::FlightDuration(total));
     assert_eq!(FlightDuration::new(total), expected);
     assert_eq!(FlightDuration::try_from(total), expected);
     assert_eq!(
         serde_json::from_str::<FlightDuration>(&total.to_string())
             .unwrap_err()
             .to_string(),
-        ValidationError::NegativeDuration(total).to_string()
+        ValidationError::FlightDuration(total).to_string()
     );
 }
 
@@ -84,7 +84,7 @@ fn refuses_a_negative_value(#[case] total: i64) {
 fn from_hours_minutes_refuses_a_negative_total() {
     assert_eq!(
         FlightDuration::from_hours_minutes(1, -90),
-        Err(ValidationError::NegativeDuration(-30))
+        Err(ValidationError::FlightDuration(-30))
     );
     assert_eq!(
         FlightDuration::from_hours_minutes(1, -60)
@@ -92,4 +92,23 @@ fn from_hours_minutes_refuses_a_negative_total() {
             .total_minutes(),
         0
     );
+}
+
+#[test]
+fn from_hours_minutes_refuses_overflow_instead_of_wrapping() {
+    assert_eq!(
+        FlightDuration::from_hours_minutes(i64::MAX, 0),
+        Err(ValidationError::FlightDurationOverflow {
+            hours: i64::MAX,
+            minutes: 0
+        })
+    );
+    assert!(FlightDuration::from_hours_minutes(0, i64::MAX).is_ok());
+    assert!(
+        FlightDuration::from_hours_minutes(0, i64::MAX)
+            .unwrap()
+            .total_minutes()
+            == i64::MAX
+    );
+    assert!(FlightDuration::from_hours_minutes(1, i64::MAX).is_err());
 }
