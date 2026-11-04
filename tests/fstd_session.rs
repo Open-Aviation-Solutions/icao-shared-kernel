@@ -33,6 +33,32 @@ fn duration_derived_from_timestamps() {
 }
 
 #[test]
+fn duration_is_none_when_end_is_before_start() {
+    let session = FstdSession::new(
+        Uuid::new_v4(),
+        None,
+        None,
+        None,
+        Some(utc_datetime!(2026-05-01 02:30)),
+        Some(utc_datetime!(2026-05-01 01:00)),
+    );
+    assert!(session.duration().is_none());
+}
+
+#[test]
+fn duration_is_none_when_end_is_seconds_before_start() {
+    let session = FstdSession::new(
+        Uuid::new_v4(),
+        None,
+        None,
+        None,
+        Some(utc_datetime!(2026-05-01 01:00:30)),
+        Some(utc_datetime!(2026-05-01 01:00:00)),
+    );
+    assert!(session.duration().is_none());
+}
+
+#[test]
 fn duration_is_none_without_both_timestamps() {
     let session = FstdSession::new(
         Uuid::new_v4(),

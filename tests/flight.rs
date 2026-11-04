@@ -39,7 +39,31 @@ fn duration_derived_from_movements() {
         Some(utc_datetime!(2026-04-19 03:00)),
         Some(utc_datetime!(2026-04-19 04:30)),
     );
-    assert_eq!(flight.duration(), Some(FlightDuration::new(90)));
+    assert_eq!(flight.duration(), Some(FlightDuration::new(90).unwrap()));
+}
+
+#[test]
+fn duration_is_none_when_last_movement_is_before_first() {
+    let flight = Flight::new(
+        Uuid::new_v4(),
+        SignificantPoint::designator("YSBK").unwrap(),
+        SignificantPoint::designator("YSCN").unwrap(),
+        Some(utc_datetime!(2026-04-19 04:30)),
+        Some(utc_datetime!(2026-04-19 03:00)),
+    );
+    assert_eq!(flight.duration(), None);
+}
+
+#[test]
+fn duration_is_none_when_last_movement_is_seconds_before_first() {
+    let flight = Flight::new(
+        Uuid::new_v4(),
+        SignificantPoint::designator("YSBK").unwrap(),
+        SignificantPoint::designator("YSCN").unwrap(),
+        Some(utc_datetime!(2026-04-19 03:00:30)),
+        Some(utc_datetime!(2026-04-19 03:00:00)),
+    );
+    assert_eq!(flight.duration(), None);
 }
 
 #[test]

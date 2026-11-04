@@ -95,6 +95,16 @@ pub enum ValidationError {
     #[error("valid_until {until} must not precede valid_from {from}")]
     ValidityPeriod { from: Date, until: Date },
 
+    /// A flight duration below zero minutes. Annex 1's definition of "flight
+    /// time" (Chapter 1) runs from the moment the aircraft first moves to the
+    /// moment it comes to rest, so it is never negative.
+    #[error("a flight duration must not be negative, got {0} minutes")]
+    FlightDuration(i64),
+
+    /// Hours and minutes whose total, in minutes, does not fit in an `i64`.
+    #[error("{hours} hours and {minutes} minutes are too many minutes for a flight duration")]
+    FlightDurationOverflow { hours: i64, minutes: i64 },
+
     /// A latitude outside the valid −90..=90 degree range.
     #[error("latitude {0} is out of range (must be -90..=90 degrees)")]
     Latitude(Decimal),

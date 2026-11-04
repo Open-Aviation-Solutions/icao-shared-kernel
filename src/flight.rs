@@ -140,10 +140,13 @@ impl Flight {
     }
 
     /// The duration of the flight, derived from the movement timestamps —
-    /// `Some` only when both are recorded. Rounded down to whole minutes.
+    /// `Some` only when both are recorded and the last is not before the
+    /// first. Rounded down to whole minutes.
     pub fn duration(&self) -> Option<FlightDuration> {
         match (self.first_movement, self.last_movement) {
-            (Some(first), Some(last)) => Some(FlightDuration::new((last - first).whole_minutes())),
+            (Some(first), Some(last)) if last >= first => {
+                FlightDuration::new((last - first).whole_minutes()).ok()
+            }
             _ => None,
         }
     }

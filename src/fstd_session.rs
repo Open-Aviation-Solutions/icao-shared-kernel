@@ -133,11 +133,14 @@ impl FstdSession {
     }
 
     /// Session time, derived from the timestamps — `Some` only when both are
-    /// recorded. Rounded down to whole minutes, matching
+    /// recorded and the end is not before the start. Rounded down to whole
+    /// minutes, matching
     /// [`Flight::duration`](crate::Flight::duration).
     pub fn duration(&self) -> Option<FlightDuration> {
         match (self.start, self.end) {
-            (Some(start), Some(end)) => Some(FlightDuration::new((end - start).whole_minutes())),
+            (Some(start), Some(end)) if end >= start => {
+                FlightDuration::new((end - start).whole_minutes()).ok()
+            }
             _ => None,
         }
     }
