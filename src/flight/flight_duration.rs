@@ -7,21 +7,28 @@
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
-/// A flight duration in whole minutes. Serialises transparently as a plain
-/// integer.
+use crate::error::ValidationError;
+
+/// A flight duration in whole minutes, never negative. Serialises
+/// transparently as a plain integer, and deserialising refuses a negative one.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
-#[serde(transparent)]
+#[serde(try_from = "i64")]
+#[serde(into = "i64")]
 pub struct FlightDuration(i64);
 
 impl FlightDuration {
-    /// Wrap a total number of minutes.
-    pub const fn new(total_minutes: i64) -> Self {
-        Self(total_minutes)
+    /// Wrap a total number of minutes, refusing a negative one.
+    pub const fn new(total_minutes: i64) -> Result<Self, ValidationError> {
+        if total_minutes < 0 {
+            return Err(ValidationError::NegativeDuration(total_minutes));
+        }
+        Ok(Self(total_minutes))
     }
 
-    /// Build a duration from whole hours and minutes (e.g. `1h 30m` → 90).
-    pub const fn from_hours_minutes(hours: i64, minutes: i64) -> Self {
-        Self(hours * 60 + minutes)
+    /// Build a duration from whole hours and minutes (e.g. `1h 30m` → 90),
+    /// refusing a negative total.
+    pub const fn from_hours_minutes(hours: i64, minutes: i64) -> Result<Self, ValidationError> {
+        Self::new(hours * 60 + minutes)
     }
 
     /// The total duration in minutes.
@@ -51,8 +58,16 @@ impl std::fmt::Display for FlightDuration {
     }
 }
 
-impl From<i64> for FlightDuration {
-    fn from(total_minutes: i64) -> Self {
-        Self(total_minutes)
+impl TryFrom<i64> for FlightDuration {
+    type Error = ValidationError;
+
+    fn try_from(total_minutes: i64) -> Result<Self, Self::Error> {
+        Self::new(total_minutes)
+    }
+}
+
+impl From<FlightDuration> for i64 {
+    fn from(duration: FlightDuration) -> Self {
+        duration.0
     }
 }

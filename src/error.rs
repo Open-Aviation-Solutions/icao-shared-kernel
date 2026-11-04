@@ -95,6 +95,10 @@ pub enum ValidationError {
     #[error("valid_until {until} must not precede valid_from {from}")]
     ValidityPeriod { from: Date, until: Date },
 
+    /// A flight duration below zero minutes.
+    #[error("a flight duration must not be negative, got {0} minutes")]
+    NegativeDuration(i64),
+
     /// A latitude outside the valid −90..=90 degree range.
     #[error("latitude {0} is out of range (must be -90..=90 degrees)")]
     Latitude(Decimal),
