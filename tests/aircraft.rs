@@ -76,10 +76,10 @@ fn nationality_mark_at_bounds_accepted(#[case] value: &str) {
 }
 
 #[rstest]
-#[case("VH", "")] // registration too short
-#[case("VH", "ABCDEF")] // registration too long
-fn registration_mark_out_of_bounds_refused(#[case] nationality: &str, #[case] registration: &str) {
-    let nationality = NationalityMark::parse(nationality).unwrap();
+#[case("")] // registration too short
+#[case("ABCDEF")] // registration too long
+fn registration_mark_out_of_bounds_refused(#[case] registration: &str) {
+    let nationality = NationalityMark::parse("VH").unwrap();
     assert!(AircraftRegistration::new(nationality, registration).is_err());
 
     let json = format!(r#"{{"nationality":"VH","registration":"{registration}"}}"#);

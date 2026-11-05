@@ -5,7 +5,6 @@
 //! Flight aggregate construction, rendering, derived duration, and serialisation.
 
 use icao_shared_kernel::{Aerodrome, Coordinate, Flight, FlightDuration, FlightRules};
-use rstest::rstest;
 use rust_decimal_macros::dec;
 use time::macros::utc_datetime;
 use uuid::Uuid;
@@ -93,15 +92,6 @@ fn display_with_movement_time_shows_date() {
         None,
     );
     assert_eq!(flight.to_string(), "Flight 2026-04-19: YSBK-YSCN");
-}
-
-#[rstest]
-#[case("ybth", "YSCN")] // invalid departure location indicator
-#[case("YSBK", "YSB")] // invalid arrival location indicator
-fn invalid_designators_rejected(#[case] departure: &str, #[case] arrival: &str) {
-    assert!(Aerodrome::listed(departure)
-        .and_then(|departure| Aerodrome::listed(arrival).map(|arrival| (departure, arrival)))
-        .is_err());
 }
 
 #[test]

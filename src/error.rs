@@ -51,6 +51,10 @@ pub enum ValidationError {
     #[error("{field} must not contain control characters")]
     ControlCharacter { field: &'static str },
 
+    /// A nationality mark outside the 1–2 character range of ICAO Annex 7's.
+    #[error("nationality mark '{0}' must be 1-2 characters long")]
+    NationalityMark(String),
+
     /// An issuing state that is not a two-letter ISO 3166-1 alpha-2 code.
     #[error("issuing State '{0}' must be a two-letter ISO 3166-1 alpha-2 code")]
     IssuingState(String),

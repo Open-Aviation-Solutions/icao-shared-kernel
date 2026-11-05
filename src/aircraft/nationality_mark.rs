@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::error::{check_length, ValidationError};
+use crate::error::ValidationError;
 
 /// The nationality mark of an aircraft's registration marks (ICAO Annex 7):
 /// one or two characters, such as `VH`, `N` or `G`.
@@ -21,7 +21,9 @@ impl NationalityMark {
     /// Parse a nationality mark, validating the Annex 7 length bound.
     pub fn parse(value: impl Into<String>) -> Result<Self, ValidationError> {
         let value = value.into();
-        check_length("nationality", &value, 1, 2)?;
+        if !(1..=2).contains(&value.chars().count()) {
+            return Err(ValidationError::NationalityMark(value));
+        }
         Ok(Self(value))
     }
 
@@ -34,6 +36,24 @@ impl NationalityMark {
 impl std::fmt::Display for NationalityMark {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(&self.0)
+    }
+}
+
+impl AsRef<str> for NationalityMark {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
+}
+
+impl PartialEq<str> for NationalityMark {
+    fn eq(&self, other: &str) -> bool {
+        self.0 == other
+    }
+}
+
+impl PartialEq<&str> for NationalityMark {
+    fn eq(&self, other: &&str) -> bool {
+        self.0 == *other
     }
 }
 
