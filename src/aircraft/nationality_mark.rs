@@ -13,7 +13,9 @@ use crate::error::{is_capital_or_digit, ValidationError};
 /// symbols of the ITU radio call-sign series, so it is one to three
 /// characters.
 ///
-/// Checked by shape: 1 to 3 capital Roman letters or Arabic numerals. Lowercase
+/// Checked by shape: 1 to 3 capital Roman letters or Arabic numerals, with at
+/// least one letter (an all-digit mark would make a registration's rendering
+/// ambiguous). Lowercase
 /// is refused, not upper-cased. The mark is not checked against the States'
 /// allocations. Serialises as the plain mark.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -21,11 +23,14 @@ use crate::error::{is_capital_or_digit, ValidationError};
 pub struct NationalityMark(String);
 
 impl NationalityMark {
-    /// Parse a nationality mark, 1 to 3 capital letters or digits.
+    /// Parse a nationality mark, 1 to 3 capital letters or digits, with a letter.
     pub fn parse(value: impl Into<String>) -> Result<Self, ValidationError> {
         let value = value.into();
         let in_bounds = (1..=3).contains(&value.len());
-        if !in_bounds || !value.bytes().all(is_capital_or_digit) {
+        if !in_bounds
+            || !value.bytes().all(is_capital_or_digit)
+            || !value.bytes().any(|b| b.is_ascii_uppercase())
+        {
             return Err(ValidationError::NationalityMark(value));
         }
         Ok(Self(value))

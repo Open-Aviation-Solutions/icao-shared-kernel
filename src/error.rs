@@ -51,13 +51,13 @@ pub enum ValidationError {
     #[error("{field} must not contain control characters")]
     ControlCharacter { field: &'static str },
 
-    /// A nationality mark that is not 1–3 capital letters or digits.
-    #[error("nationality mark '{0}' must be 1-3 capital letters or digits")]
+    /// A nationality mark that is not 1–3 capital letters or digits with at
+    /// least one letter.
+    #[error("nationality mark '{0}' must be 1-3 capital letters or digits, with a letter")]
     NationalityMark(String),
 
-    /// A registration mark containing anything but capital letters and
-    /// digits (its length is checked as [`ValidationError::FieldLength`]).
-    #[error("registration mark '{0}' must be capital letters and digits only")]
+    /// A registration mark that is not 1–5 capital letters or digits.
+    #[error("registration mark '{0}' must be 1-5 capital letters or digits")]
     RegistrationMark(String),
 
     /// An issuing state that is not a two-letter ISO 3166-1 alpha-2 code.

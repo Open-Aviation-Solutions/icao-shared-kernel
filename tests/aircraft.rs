@@ -4,7 +4,9 @@
 
 //! Aircraft type, registration, and aggregate behaviour.
 
-use icao_shared_kernel::{Aircraft, AircraftRegistration, AircraftType, NationalityMark};
+use icao_shared_kernel::{
+    Aircraft, AircraftRegistration, AircraftType, NationalityMark, ValidationError,
+};
 use rstest::rstest;
 use uuid::Uuid;
 
@@ -67,8 +69,12 @@ fn invalid_designators_rejected(#[case] value: &str) {
 #[case("vh")] // lowercase
 #[case("V-")] // punctuation
 #[case("V ")] // whitespace
-fn nationality_mark_out_of_bounds_refused(#[case] value: &str) {
-    assert!(NationalityMark::parse(value).is_err());
+#[case("999")] // no letter
+fn nationality_mark_refused(#[case] value: &str) {
+    assert!(matches!(
+        NationalityMark::parse(value),
+        Err(ValidationError::NationalityMark(_))
+    ));
 }
 
 #[rstest]
@@ -86,9 +92,12 @@ fn nationality_mark_at_bounds_accepted(#[case] value: &str) {
 #[case("abc")] // lowercase
 #[case("A-B")] // punctuation
 #[case("AB ")] // whitespace
-fn registration_mark_out_of_bounds_refused(#[case] registration: &str) {
+fn registration_mark_refused(#[case] registration: &str) {
     let nationality = NationalityMark::parse("VH").unwrap();
-    assert!(AircraftRegistration::new(nationality, registration).is_err());
+    assert!(matches!(
+        AircraftRegistration::new(nationality, registration),
+        Err(ValidationError::RegistrationMark(_))
+    ));
 
     let json = format!(r#"{{"nationality":"VH","registration":"{registration}"}}"#);
     assert!(serde_json::from_str::<AircraftRegistration>(&json).is_err());
@@ -105,6 +114,7 @@ fn registration_mark_at_bounds_accepted() {
 #[case("VHXY")]
 #[case("vh")]
 #[case("V-")]
+#[case("999")]
 fn bad_nationality_mark_from_json_refused(#[case] nationality: &str) {
     let json = format!(r#"{{"nationality":"{nationality}","registration":"ABC"}}"#);
     assert!(serde_json::from_str::<AircraftRegistration>(&json).is_err());

@@ -7,7 +7,7 @@
 use serde::{Deserialize, Serialize};
 
 use super::NationalityMark;
-use crate::error::{check_length, is_capital_or_digit, ValidationError};
+use crate::error::{is_capital_or_digit, ValidationError};
 
 /// Aircraft nationality and registration marks (ICAO Annex 7).
 ///
@@ -30,8 +30,8 @@ impl AircraftRegistration {
         registration: impl Into<String>,
     ) -> Result<Self, ValidationError> {
         let registration = registration.into();
-        check_length("registration", &registration, 1, 5)?;
-        if !registration.bytes().all(is_capital_or_digit) {
+        if !(1..=5).contains(&registration.len()) || !registration.bytes().all(is_capital_or_digit)
+        {
             return Err(ValidationError::RegistrationMark(registration));
         }
         Ok(Self {
@@ -71,7 +71,7 @@ impl std::fmt::Display for AircraftRegistration {
 // hand-built one. The reverse `From` provides the serialise direction.
 #[derive(Serialize, Deserialize)]
 struct RegistrationData {
-    nationality: String,
+    nationality: NationalityMark,
     registration: String,
 }
 
@@ -79,14 +79,14 @@ impl TryFrom<RegistrationData> for AircraftRegistration {
     type Error = ValidationError;
 
     fn try_from(data: RegistrationData) -> Result<Self, Self::Error> {
-        Self::new(NationalityMark::parse(data.nationality)?, data.registration)
+        Self::new(data.nationality, data.registration)
     }
 }
 
 impl From<AircraftRegistration> for RegistrationData {
     fn from(value: AircraftRegistration) -> Self {
         Self {
-            nationality: value.nationality.into(),
+            nationality: value.nationality,
             registration: value.registration,
         }
     }

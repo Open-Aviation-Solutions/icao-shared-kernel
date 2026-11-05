@@ -70,8 +70,7 @@ and `IssuingState` for an authority's State. `icao-shared-kernel-py`, the Python
 bindings, is archived and no longer follows this crate's releases.
 
 Choose the best API, not the compatible one: while the crate is on `0.x`, a
-breaking change is fine. It is released as a new minor, and each consumer
-moves to it in its own time (their instructions say how).
+breaking change is fine.
 
 While on `0.x`, a breaking release bumps the minor version (`0.2.0`), and a
 compatible one the patch. Breaking includes a change to the API and any change
