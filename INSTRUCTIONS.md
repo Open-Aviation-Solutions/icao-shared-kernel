@@ -51,7 +51,7 @@ test alongside it and record the regulatory basis in the doc comment.
   `flight/significant_point.rs`, `flight/flight_duration.rs`,
   `flight/flight_rules.rs`, `flight/location_indicator.rs`;
   `aircraft/aircraft_type.rs`,
-  `aircraft/registration.rs`; `pilot/licence.rs`, `pilot/licence_title.rs`,
+  `aircraft/nationality_mark.rs`, `aircraft/registration.rs`; `pilot/licence.rs`, `pilot/licence_title.rs`,
   `pilot/aircraft_category.rs`, `pilot/capacity.rs`,
   `pilot/minimum_ages.rs`; `fstd/designation.rs`, `fstd/qualification.rs`).
   An aggregate with no value objects of its own has no sibling directory
@@ -71,7 +71,7 @@ and `IssuingState` for an authority's State. `icao-shared-kernel-py`, the Python
 bindings, is archived and no longer follows this crate's releases.
 
 Choose the best API, not the compatible one: while the crate is on `0.x`, a
-breaking change is fine, landed with a matching PR in each consumer.
+breaking change is fine.
 
 While on `0.x`, a breaking release bumps the minor version (`0.2.0`), and a
 compatible one the patch. Breaking includes a change to the API and any change

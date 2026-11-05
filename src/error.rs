@@ -51,6 +51,15 @@ pub enum ValidationError {
     #[error("{field} must not contain control characters")]
     ControlCharacter { field: &'static str },
 
+    /// A nationality mark that is not 1–3 capital letters or digits with at
+    /// least one letter.
+    #[error("nationality mark '{0}' must be 1-3 capital letters or digits, with a letter")]
+    NationalityMark(String),
+
+    /// A registration mark that is not 1–5 capital letters or digits.
+    #[error("registration mark '{0}' must be 1-5 capital letters or digits")]
+    RegistrationMark(String),
+
     /// An issuing state that is not a two-letter ISO 3166-1 alpha-2 code.
     #[error("issuing State '{0}' must be a two-letter ISO 3166-1 alpha-2 code")]
     IssuingState(String),
@@ -163,6 +172,12 @@ pub(crate) fn check_length(
 /// code such as an issuing State or a location indicator.
 pub(crate) fn is_ascii_uppercase_of_len(value: &str, len: usize) -> bool {
     value.len() == len && value.bytes().all(|b| b.is_ascii_uppercase())
+}
+
+/// Whether `b` is a capital Roman letter or an Arabic numeral: the characters
+/// of an aircraft's nationality and registration marks.
+pub(crate) fn is_capital_or_digit(b: u8) -> bool {
+    b.is_ascii_uppercase() || b.is_ascii_digit()
 }
 
 /// Require a string field to be non-empty, with no upper bound on its length.

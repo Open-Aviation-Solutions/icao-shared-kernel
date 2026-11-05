@@ -28,7 +28,7 @@ mod iso_date;
 pub mod issuing_state;
 pub mod pilot;
 
-pub use aircraft::{Aircraft, AircraftRegistration, AircraftType};
+pub use aircraft::{Aircraft, AircraftRegistration, AircraftType, NationalityMark};
 pub use approach_type::{ApproachType, RnpApchMinima};
 pub use error::ValidationError;
 pub use flight::aerodrome::{Aerodrome, UnlistedAerodrome};
@@ -37,7 +37,7 @@ pub use flight::flight_duration::FlightDuration;
 pub use flight::flight_rules::FlightRules;
 pub use flight::location_indicator::LocationIndicator;
 pub use flight::significant_point::SignificantPoint;
-pub use flight::waypoint::{validate_waypoint_code, Waypoint};
+pub use flight::waypoint::Waypoint;
 pub use flight::Flight;
 pub use fstd::{DeviceDesignation, DeviceQualification, FlightSimulationTrainingDevice, FstdKind};
 pub use fstd_session::FstdSession;
