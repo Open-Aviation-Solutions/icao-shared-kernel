@@ -14,6 +14,16 @@ fn four_uppercase_letters_are_accepted() {
     assert_eq!(LocationIndicator::parse("YSBK").unwrap().as_str(), "YSBK");
 }
 
+#[test]
+fn it_compares_with_the_plain_code() {
+    let indicator = LocationIndicator::parse("YSBK").unwrap();
+    let held: &LocationIndicator = &indicator; // as a getter returns it
+    assert!(held == "YSBK");
+    assert!(indicator == *"YSBK");
+    assert!(indicator != "KJFK");
+    assert_eq!(indicator.as_ref(), "YSBK");
+}
+
 #[rstest]
 #[case("YSB")] // three letters
 #[case("YSBKX")] // five letters

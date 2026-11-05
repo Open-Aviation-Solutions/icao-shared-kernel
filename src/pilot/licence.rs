@@ -104,9 +104,11 @@ impl Licence {
 // `Licence` keeps its fields private so the only way to build one is through
 // `new`, which enforces the invariants. Serde's derived `Deserialize` would
 // bypass that constructor and populate the fields directly, letting invalid
-// values in from JSON. `LicenceData` is a plain, unchecked mirror of the wire
-// shape: serde deserialises into it, then `try_from` funnels it through `new`
-// so a deserialised licence is validated exactly like a hand-built one. The
+// values in from JSON. `LicenceData` mirrors the wire shape, its fields not
+// yet checked together (only `issuing_state`, an `IssuingState`, is checked
+// as it is read): serde deserialises into it, then `try_from` funnels it
+// through `new` so a deserialised licence is validated exactly like a
+// hand-built one. The
 // reverse `From` provides the serialise direction. `titles` has no default:
 // a licence without the field is refused.
 #[derive(Serialize, Deserialize)]

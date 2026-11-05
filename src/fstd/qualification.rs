@@ -99,7 +99,8 @@ impl DeviceQualification {
     }
 }
 
-// A plain, unchecked mirror of the wire shape. `DeviceQualification` keeps its
+// A mirror of the wire shape, its fields not yet checked together (only
+// `issuing_state`, an `IssuingState`, is checked as it is read). `DeviceQualification` keeps its
 // fields private so `new` is the only way to build one; serde's derived
 // `Deserialize` would bypass it and let an invalid validity period in from
 // JSON, so deserialisation funnels through `try_from` instead. Same pattern as

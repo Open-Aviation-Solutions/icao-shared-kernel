@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::error::ValidationError;
+use crate::error::{is_ascii_uppercase_of_len, ValidationError};
 
 /// An ICAO location indicator, such as an aerodrome's (e.g. `YSBK`, `KJFK`):
 /// the four-letter code group that ICAO Doc 7910 lists.
@@ -22,8 +22,7 @@ impl LocationIndicator {
     /// Parse a location indicator: exactly four ASCII uppercase letters.
     pub fn parse(value: impl Into<String>) -> Result<Self, ValidationError> {
         let value = value.into();
-        let is_indicator = value.len() == 4 && value.bytes().all(|b| b.is_ascii_uppercase());
-        if !is_indicator {
+        if !is_ascii_uppercase_of_len(&value, 4) {
             return Err(ValidationError::LocationIndicator(value));
         }
         Ok(Self(value))
@@ -38,6 +37,24 @@ impl LocationIndicator {
 impl std::fmt::Display for LocationIndicator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(&self.0)
+    }
+}
+
+impl AsRef<str> for LocationIndicator {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
+}
+
+impl PartialEq<str> for LocationIndicator {
+    fn eq(&self, other: &str) -> bool {
+        self.0 == other
+    }
+}
+
+impl PartialEq<&str> for LocationIndicator {
+    fn eq(&self, other: &&str) -> bool {
+        self.0 == *other
     }
 }
 

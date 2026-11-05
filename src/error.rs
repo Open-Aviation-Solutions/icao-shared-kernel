@@ -47,7 +47,7 @@ pub enum ValidationError {
     Empty { field: &'static str },
 
     /// An issuing state that is not a two-letter ISO 3166-1 alpha-2 code.
-    #[error("issuing_state '{0}' must be a two-letter ISO 3166-1 alpha-2 code")]
+    #[error("issuing State '{0}' must be a two-letter ISO 3166-1 alpha-2 code")]
     IssuingState(String),
 
     /// A location indicator that is not four uppercase letters, the shape of
@@ -138,6 +138,12 @@ pub(crate) fn check_length(
         });
     }
     Ok(())
+}
+
+/// Whether `value` is exactly `len` ASCII uppercase letters: the shape of a
+/// code such as an issuing State or a location indicator.
+pub(crate) fn is_ascii_uppercase_of_len(value: &str, len: usize) -> bool {
+    value.len() == len && value.bytes().all(|b| b.is_ascii_uppercase())
 }
 
 /// Require a string field to be non-empty, with no upper bound on its length.

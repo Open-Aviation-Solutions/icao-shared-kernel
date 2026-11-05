@@ -7,10 +7,13 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::error::ValidationError;
+use crate::error::{is_ascii_uppercase_of_len, ValidationError};
 
 /// The State that issued a licence or qualification, as its ISO 3166-1
 /// alpha-2 code (e.g. `AU`, `US`).
+///
+/// A licence names the State that issued it (ICAO Annex 1, 5.2.1 I); this
+/// crate writes that State as its ISO 3166-1 alpha-2 code.
 ///
 /// Checked by shape: exactly two ASCII uppercase letters. Membership of the
 /// real code list is intentionally left for a later step. Serialises as the
@@ -23,8 +26,7 @@ impl IssuingState {
     /// Parse an ISO 3166-1 alpha-2 code: exactly two ASCII uppercase letters.
     pub fn parse(value: impl Into<String>) -> Result<Self, ValidationError> {
         let value = value.into();
-        let is_alpha2 = value.len() == 2 && value.bytes().all(|b| b.is_ascii_uppercase());
-        if !is_alpha2 {
+        if !is_ascii_uppercase_of_len(&value, 2) {
             return Err(ValidationError::IssuingState(value));
         }
         Ok(Self(value))
@@ -39,6 +41,24 @@ impl IssuingState {
 impl std::fmt::Display for IssuingState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(&self.0)
+    }
+}
+
+impl AsRef<str> for IssuingState {
+    fn as_ref(&self) -> &str {
+        &self.0
+    }
+}
+
+impl PartialEq<str> for IssuingState {
+    fn eq(&self, other: &str) -> bool {
+        self.0 == other
+    }
+}
+
+impl PartialEq<&str> for IssuingState {
+    fn eq(&self, other: &&str) -> bool {
+        self.0 == *other
     }
 }
 

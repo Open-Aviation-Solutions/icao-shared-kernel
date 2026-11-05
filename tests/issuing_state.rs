@@ -21,10 +21,23 @@ fn a_two_letter_code_is_accepted() {
 #[case("A1")] // a digit
 #[case("")] // empty
 fn a_malformed_code_is_refused(#[case] state: &str) {
+    let error = IssuingState::parse(state).unwrap_err();
+    assert_eq!(error, ValidationError::IssuingState(state.to_owned()));
     assert_eq!(
-        IssuingState::parse(state),
-        Err(ValidationError::IssuingState(state.to_owned()))
+        error.to_string(),
+        format!("issuing State '{state}' must be a two-letter ISO 3166-1 alpha-2 code")
     );
+}
+
+#[test]
+fn it_compares_with_the_plain_code() {
+    const AUSTRALIA: &str = "AU";
+    let state = IssuingState::parse("AU").unwrap();
+    let held: &IssuingState = &state; // as a getter such as `Licence::issuing_state` returns it
+    assert!(held == AUSTRALIA);
+    assert!(state == *"AU");
+    assert!(state != "NZ");
+    assert_eq!(state.as_ref(), "AU");
 }
 
 #[test]

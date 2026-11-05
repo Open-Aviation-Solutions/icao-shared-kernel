@@ -24,7 +24,7 @@ pub mod flight;
 pub mod fstd;
 pub mod fstd_session;
 mod iso_date;
-mod issuing_state;
+pub mod issuing_state;
 pub mod pilot;
 
 pub use aircraft::{Aircraft, AircraftRegistration, AircraftType};
