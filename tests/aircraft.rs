@@ -29,7 +29,10 @@ fn registration_renders_and_exposes_marks() {
 
 #[test]
 fn aircraft_creation_and_display() {
-    let aircraft = Aircraft::create("C172", "VH", "XYZ").unwrap();
+    let aircraft = Aircraft::new(
+        AircraftType::parse("C172").unwrap(),
+        AircraftRegistration::new("VH", "XYZ").unwrap(),
+    );
     assert_eq!(aircraft.aircraft_type.as_str(), "C172");
     assert_eq!(aircraft.to_string(), "C172 VH-XYZ");
 }

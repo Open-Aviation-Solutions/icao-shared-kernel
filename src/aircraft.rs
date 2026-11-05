@@ -13,8 +13,6 @@ pub use registration::AircraftRegistration;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::error::ValidationError;
-
 /// Aircraft reference entity with ICAO-universal identity and descriptors.
 ///
 /// Carries only ICAO-universal facts: the surrogate id, the Doc 8643 type
@@ -42,19 +40,6 @@ impl Aircraft {
             aircraft_type,
             registration,
         }
-    }
-
-    /// Convenience constructor from raw strings, validating each part and
-    /// assigning a fresh id.
-    pub fn create(
-        type_designator: &str,
-        nationality: &str,
-        registration: &str,
-    ) -> Result<Self, ValidationError> {
-        Ok(Self::new(
-            AircraftType::parse(type_designator)?,
-            AircraftRegistration::new(nationality, registration)?,
-        ))
     }
 }
 
