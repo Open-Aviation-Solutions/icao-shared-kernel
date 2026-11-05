@@ -7,9 +7,13 @@
 use serde::{Deserialize, Serialize};
 
 use super::NationalityMark;
-use crate::error::{check_length, ValidationError};
+use crate::error::{check_length, is_capital_or_digit, ValidationError};
 
 /// Aircraft nationality and registration marks (ICAO Annex 7).
+///
+/// Displays as the nationality mark and the registration mark joined by a
+/// hyphen (`VH-ABC`), or with no hyphen when the registration mark begins with
+/// a digit (`N12345`).
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(try_from = "RegistrationData", into = "RegistrationData")]
 pub struct AircraftRegistration {
@@ -19,25 +23,29 @@ pub struct AircraftRegistration {
 
 impl AircraftRegistration {
     /// Build registration marks from a nationality mark and a registration
-    /// mark, validating the registration mark's Annex 7 length bound.
+    /// mark, validating the registration mark: 1 to 5 capital letters or digits
+    /// (lowercase is refused, not upper-cased).
     pub fn new(
         nationality: NationalityMark,
         registration: impl Into<String>,
     ) -> Result<Self, ValidationError> {
         let registration = registration.into();
         check_length("registration", &registration, 1, 5)?;
+        if !registration.bytes().all(is_capital_or_digit) {
+            return Err(ValidationError::RegistrationMark(registration));
+        }
         Ok(Self {
             nationality,
             registration,
         })
     }
 
-    /// The nationality mark (e.g. `VH`, `N`, `G`).
+    /// The nationality mark (e.g. `VH`, `N`, `G`, `A9C`).
     pub fn nationality(&self) -> &NationalityMark {
         &self.nationality
     }
 
-    /// The alphanumeric registration mark following the nationality mark.
+    /// The registration mark (capital letters and digits) following the nationality mark.
     pub fn registration(&self) -> &str {
         &self.registration
     }
@@ -45,7 +53,12 @@ impl AircraftRegistration {
 
 impl std::fmt::Display for AircraftRegistration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}-{}", self.nationality, self.registration)
+        let hyphen = if self.registration.starts_with(|c: char| c.is_ascii_digit()) {
+            ""
+        } else {
+            "-"
+        };
+        write!(f, "{}{hyphen}{}", self.nationality, self.registration)
     }
 }
 

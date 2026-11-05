@@ -6,22 +6,26 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::error::ValidationError;
+use crate::error::{is_capital_or_digit, ValidationError};
 
-/// The nationality mark of an aircraft's registration marks (ICAO Annex 7):
-/// one or two characters, such as `VH`, `N` or `G`.
+/// The nationality mark of an aircraft's registration marks (ICAO Annex 7),
+/// such as `VH`, `N`, `G` or `A9C`. Annex 7 takes it from the nationality
+/// symbols of the ITU radio call-sign series, so it is one to three
+/// characters.
 ///
-/// Checked by length only, 1 to 2 characters; the mark is not checked against
-/// the States' allocations. Serialises as the plain mark.
+/// Checked by shape: 1 to 3 capital Roman letters or Arabic numerals. Lowercase
+/// is refused, not upper-cased. The mark is not checked against the States'
+/// allocations. Serialises as the plain mark.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(try_from = "String", into = "String")]
 pub struct NationalityMark(String);
 
 impl NationalityMark {
-    /// Parse a nationality mark, validating the Annex 7 length bound.
+    /// Parse a nationality mark, 1 to 3 capital letters or digits.
     pub fn parse(value: impl Into<String>) -> Result<Self, ValidationError> {
         let value = value.into();
-        if !(1..=2).contains(&value.chars().count()) {
+        let in_bounds = (1..=3).contains(&value.len());
+        if !in_bounds || !value.bytes().all(is_capital_or_digit) {
             return Err(ValidationError::NationalityMark(value));
         }
         Ok(Self(value))

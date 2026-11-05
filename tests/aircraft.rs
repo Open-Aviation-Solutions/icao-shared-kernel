@@ -63,7 +63,10 @@ fn invalid_designators_rejected(#[case] value: &str) {
 
 #[rstest]
 #[case("")] // too short
-#[case("VHX")] // too long
+#[case("VHXY")] // too long
+#[case("vh")] // lowercase
+#[case("V-")] // punctuation
+#[case("V ")] // whitespace
 fn nationality_mark_out_of_bounds_refused(#[case] value: &str) {
     assert!(NationalityMark::parse(value).is_err());
 }
@@ -71,6 +74,8 @@ fn nationality_mark_out_of_bounds_refused(#[case] value: &str) {
 #[rstest]
 #[case("N")]
 #[case("VH")]
+#[case("A9C")]
+#[case("9XR")]
 fn nationality_mark_at_bounds_accepted(#[case] value: &str) {
     assert_eq!(NationalityMark::parse(value).unwrap().as_str(), value);
 }
@@ -78,6 +83,9 @@ fn nationality_mark_at_bounds_accepted(#[case] value: &str) {
 #[rstest]
 #[case("")] // registration too short
 #[case("ABCDEF")] // registration too long
+#[case("abc")] // lowercase
+#[case("A-B")] // punctuation
+#[case("AB ")] // whitespace
 fn registration_mark_out_of_bounds_refused(#[case] registration: &str) {
     let nationality = NationalityMark::parse("VH").unwrap();
     assert!(AircraftRegistration::new(nationality, registration).is_err());
@@ -94,7 +102,9 @@ fn registration_mark_at_bounds_accepted() {
 
 #[rstest]
 #[case("")]
-#[case("VHX")]
+#[case("VHXY")]
+#[case("vh")]
+#[case("V-")]
 fn bad_nationality_mark_from_json_refused(#[case] nationality: &str) {
     let json = format!(r#"{{"nationality":"{nationality}","registration":"ABC"}}"#);
     assert!(serde_json::from_str::<AircraftRegistration>(&json).is_err());
@@ -106,4 +116,19 @@ fn registration_json_shape_is_unchanged() {
     let reg: AircraftRegistration = serde_json::from_str(json).unwrap();
     assert_eq!(reg.to_string(), "VH-ABC");
     assert_eq!(serde_json::to_string(&reg).unwrap(), json);
+}
+
+#[rstest]
+#[case("VH", "ABC", "VH-ABC")]
+#[case("A9C", "BCD", "A9C-BCD")]
+#[case("N", "12345", "N12345")]
+#[case("9XR", "1", "9XR1")]
+fn registration_hyphen_only_before_a_letter(
+    #[case] nationality: &str,
+    #[case] registration: &str,
+    #[case] expected: &str,
+) {
+    let reg = AircraftRegistration::new(NationalityMark::parse(nationality).unwrap(), registration)
+        .unwrap();
+    assert_eq!(reg.to_string(), expected);
 }
