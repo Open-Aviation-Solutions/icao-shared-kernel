@@ -33,13 +33,17 @@ fn a_designator_that_is_not_a_location_indicator_is_refused(#[case] value: &str)
         Aerodrome::listed(value).unwrap_err(),
         ValidationError::LocationIndicator(value.to_owned())
     );
-    assert!(serde_json::from_value::<Aerodrome>(json!(value)).is_err());
+    let error = serde_json::from_value::<Aerodrome>(json!(value)).unwrap_err();
+    assert_eq!(
+        error.to_string(),
+        format!("location indicator '{value}' must be four uppercase letters")
+    );
 }
 
 #[rstest]
 #[case(Some("Farm strip"), None, "Farm strip")]
 #[case(None, Some(position()), "-33.9461,151.1772")]
-#[case(Some("Farm strip"), Some(position()), "Farm strip")]
+#[case(Some("Farm strip"), Some(position()), "Farm strip (-33.9461,151.1772)")]
 fn an_unlisted_aerodrome_has_a_name_or_a_position(
     #[case] name: Option<&str>,
     #[case] position: Option<Coordinate>,
@@ -61,6 +65,33 @@ fn an_unlisted_aerodrome_with_neither_is_refused() {
     assert_eq!(
         error.to_string(),
         "an unlisted aerodrome must have a name or a position"
+    );
+}
+
+#[test]
+fn a_name_is_held_without_its_surrounding_whitespace() {
+    let unlisted = UnlistedAerodrome::new(Some("  Farm strip\t".to_owned()), None).unwrap();
+    assert_eq!(unlisted.name(), Some("Farm strip"));
+    assert_eq!(
+        unlisted,
+        UnlistedAerodrome::new(Some("Farm strip".to_owned()), None).unwrap()
+    );
+}
+
+#[rstest]
+#[case("Farm\nstrip")]
+#[case("Farm\u{7}strip")]
+fn a_name_with_a_control_character_is_refused(#[case] name: &str) {
+    let error = UnlistedAerodrome::new(Some(name.to_owned()), None).unwrap_err();
+    assert_eq!(
+        error,
+        ValidationError::ControlCharacter {
+            field: "aerodrome name"
+        }
+    );
+    assert_eq!(
+        error.to_string(),
+        "aerodrome name must not contain control characters"
     );
 }
 
@@ -107,10 +138,39 @@ fn a_bare_coordinate_is_read_as_a_position_with_no_name() {
 }
 
 #[rstest]
-#[case(json!({}))] // neither
-#[case(json!({"name": " "}))] // a blank name
-#[case(json!({"latitude": "91", "longitude": "0"}))] // out of range
-#[case(json!({"name": "Farm strip", "elevation": 100}))] // an unknown field
-fn an_invalid_unlisted_aerodrome_is_refused_on_the_wire(#[case] value: serde_json::Value) {
-    assert!(serde_json::from_value::<Aerodrome>(value).is_err());
+#[case(json!({}), "an unlisted aerodrome must have a name or a position")]
+#[case(json!({"name": " "}), "aerodrome name must not be empty")]
+#[case(json!({"name": "Farm\nstrip"}), "aerodrome name must not contain control characters")]
+#[case(
+    json!({"latitude": "91", "longitude": "0"}),
+    "latitude 91 is out of range (must be -90..=90 degrees)"
+)]
+#[case(
+    json!({"name": "Farm strip", "position": {"latitude": "0", "longitude": "181"}}),
+    "longitude 181 is out of range (must be -180..=180 degrees)"
+)]
+#[case(
+    json!({"name": "Farm strip", "elevation": 100}),
+    "unknown field `elevation`, expected one of `name`, `position`, `latitude`, `longitude`"
+)]
+#[case(
+    json!({"latitude": "-33.9461", "longitude": "151.1772", "name": "Farm strip"}),
+    "an unlisted aerodrome is either {\"name\", \"position\"} or a bare \
+     {\"latitude\", \"longitude\"}, not a mix of them"
+)]
+#[case(
+    json!({"latitude": "-33.9461"}),
+    "an unlisted aerodrome is either {\"name\", \"position\"} or a bare \
+     {\"latitude\", \"longitude\"}, not a mix of them"
+)]
+#[case(
+    json!(42),
+    "invalid type: integer `42`, expected a location indicator, or an object describing an unlisted aerodrome"
+)]
+fn an_invalid_aerodrome_is_refused_on_the_wire_with_its_reason(
+    #[case] value: serde_json::Value,
+    #[case] reason: &str,
+) {
+    let error = serde_json::from_value::<Aerodrome>(value).unwrap_err();
+    assert_eq!(error.to_string(), reason);
 }

@@ -137,7 +137,9 @@ impl Flight {
         ))
     }
 
-    /// Canonical short route string, e.g. `YSBK-YSCN`.
+    /// A short route string for showing, e.g. `YSBK-YSCN`: the departure
+    /// and the arrival joined by `-`. It is not to be split back into the
+    /// two, since an unlisted aerodrome's name or position may hold a `-`.
     pub fn route_summary(&self) -> String {
         format!("{}-{}", self.departure, self.arrival)
     }

@@ -175,3 +175,15 @@ fn a_flight_recorded_without_flight_rules_reads_as_none() {
     let back: Flight = serde_json::from_value(json).unwrap();
     assert_eq!(back.flight_rules, None);
 }
+
+#[test]
+fn a_flight_recorded_with_a_waypoint_for_an_aerodrome_is_refused_with_the_reason() {
+    let flight = Flight::create(Uuid::new_v4(), "YSBK", "YSCN").unwrap();
+    let mut json = serde_json::to_value(&flight).unwrap();
+    json["departure"] = "YSB".into();
+    let error = serde_json::from_value::<Flight>(json).unwrap_err();
+    assert_eq!(
+        error.to_string(),
+        "location indicator 'YSB' must be four uppercase letters"
+    );
+}

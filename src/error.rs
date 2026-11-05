@@ -46,6 +46,11 @@ pub enum ValidationError {
     #[error("{field} must not be empty")]
     Empty { field: &'static str },
 
+    /// A one-line text field holding a control character, such as a line
+    /// break.
+    #[error("{field} must not contain control characters")]
+    ControlCharacter { field: &'static str },
+
     /// An issuing state that is not a two-letter ISO 3166-1 alpha-2 code.
     #[error("issuing State '{0}' must be a two-letter ISO 3166-1 alpha-2 code")]
     IssuingState(String),
