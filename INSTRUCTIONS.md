@@ -57,7 +57,8 @@ test alongside it and record the regulatory basis in the doc comment.
   An aggregate with no value objects of its own has no sibling directory
   (`fstd_session.rs`). A value object that more than one aggregate holds is
   a public module file of its own at the top (`issuing_state.rs`, held by
-  `Licence` and `DeviceQualification`). `lib.rs` re-exports the value objects so the
+  `Licence` and `DeviceQualification`), as is one that no aggregate holds
+  (`approach_type.rs`). `lib.rs` re-exports the value objects so the
   public API stays flat.
 
 ## Consumers

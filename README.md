@@ -14,8 +14,8 @@ tools, and is the part of them that has no country's rules in it.
 
 ## Status
 
-Early: the version is `0.4.0`. Take it by a caret range from that version
-(`"0.4.0"`): until `1.0` a breaking release is a minor version, as
+Early: the version is `0.5.0`. Take it by a caret range from that version
+(`"0.5.0"`): until `1.0` a breaking release is a minor version, as
 [`INSTRUCTIONS.md`, "Consumers"](INSTRUCTIONS.md#consumers) sets out, though
 releases up to `0.1.3` broke each other as patches. On `main` a
 breaking change lands whenever it gives a better API, together with the changes
@@ -28,6 +28,9 @@ What is covered:
   `Aerodrome` (a flight's departure or arrival: listed by its location
   indicator, or an `UnlistedAerodrome` described by its name, its position or
   both), `FlightDuration`, `FlightRules`,
+  `ApproachType` (an instrument approach procedure's type, with
+  `RnpApchMinima`, and whether flown straight in it is a 3D approach
+  operation),
   `LocationIndicator` (the four-letter code of ICAO Doc 7910, such as an
   aerodrome's), `AircraftType`, `AircraftRegistration`, `IssuingState` (a
   licence's or a device qualification's, as an ISO 3166-1 alpha-2 code),
@@ -89,7 +92,7 @@ or in `Cargo.toml`:
 
 ```toml
 [dependencies]
-icao-shared-kernel = "0.4.0"
+icao-shared-kernel = "0.5.0"
 ```
 
 To follow `main` instead, depend on it by git and pin a commit with `rev`,

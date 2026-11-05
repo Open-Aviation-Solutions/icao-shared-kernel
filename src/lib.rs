@@ -19,6 +19,7 @@
 //! cannot represent an invalid state.
 
 pub mod aircraft;
+pub mod approach_type;
 pub mod error;
 pub mod flight;
 pub mod fstd;
@@ -28,6 +29,7 @@ pub mod issuing_state;
 pub mod pilot;
 
 pub use aircraft::{Aircraft, AircraftRegistration, AircraftType, NationalityMark};
+pub use approach_type::{ApproachType, RnpApchMinima};
 pub use error::ValidationError;
 pub use flight::aerodrome::{Aerodrome, UnlistedAerodrome};
 pub use flight::coordinate::Coordinate;
