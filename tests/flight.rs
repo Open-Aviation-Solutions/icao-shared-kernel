@@ -5,14 +5,24 @@
 //! Flight aggregate construction, rendering, derived duration, and serialisation.
 
 use icao_shared_kernel::{Aerodrome, Coordinate, Flight, FlightDuration, FlightRules};
-use rstest::rstest;
 use rust_decimal_macros::dec;
 use time::macros::utc_datetime;
 use uuid::Uuid;
 
+/// A flight from YSBK to YSCN with no movement times recorded.
+fn ysbk_to_yscn() -> Flight {
+    Flight::new(
+        Uuid::new_v4(),
+        Aerodrome::listed("YSBK").unwrap(),
+        Aerodrome::listed("YSCN").unwrap(),
+        None,
+        None,
+    )
+}
+
 #[test]
 fn defaults_id_and_no_movement_times() {
-    let flight = Flight::create(Uuid::new_v4(), "YSBK", "YSCN").unwrap();
+    let flight = ysbk_to_yscn();
     assert!(flight.first_movement.is_none());
     assert!(flight.last_movement.is_none());
     assert_ne!(flight.id, Uuid::nil());
@@ -20,13 +30,13 @@ fn defaults_id_and_no_movement_times() {
 
 #[test]
 fn route_summary() {
-    let flight = Flight::create(Uuid::new_v4(), "YSBK", "YSCN").unwrap();
+    let flight = ysbk_to_yscn();
     assert_eq!(flight.route_summary(), "YSBK-YSCN");
 }
 
 #[test]
 fn duration_is_none_without_both_movements() {
-    let flight = Flight::create(Uuid::new_v4(), "YSBK", "YSCN").unwrap();
+    let flight = ysbk_to_yscn();
     assert_eq!(flight.duration(), None);
 }
 
@@ -68,7 +78,7 @@ fn duration_is_none_when_last_movement_is_seconds_before_first() {
 
 #[test]
 fn display_without_movement_time_omits_date() {
-    let flight = Flight::create(Uuid::new_v4(), "YSBK", "YSCN").unwrap();
+    let flight = ysbk_to_yscn();
     assert_eq!(flight.to_string(), "Flight: YSBK-YSCN");
 }
 
@@ -82,13 +92,6 @@ fn display_with_movement_time_shows_date() {
         None,
     );
     assert_eq!(flight.to_string(), "Flight 2026-04-19: YSBK-YSCN");
-}
-
-#[rstest]
-#[case("ybth", "YSCN")] // invalid departure location indicator
-#[case("YSBK", "YSB")] // invalid arrival location indicator
-fn invalid_designators_rejected(#[case] departure: &str, #[case] arrival: &str) {
-    assert!(Flight::create(Uuid::new_v4(), departure, arrival).is_err());
 }
 
 #[test]
@@ -139,7 +142,7 @@ fn json_round_trip_preserves_value() {
 
 #[test]
 fn flight_rules_are_unrecorded_until_set() {
-    let flight = Flight::create(Uuid::new_v4(), "YSBK", "YSCN").unwrap();
+    let flight = ysbk_to_yscn();
     assert_eq!(flight.flight_rules, None);
     let flight = flight.with_flight_rules(Some(FlightRules::Ifr));
     assert_eq!(flight.flight_rules, Some(FlightRules::Ifr));
@@ -169,7 +172,7 @@ fn flight_rules_are_spelled_as_their_names() {
 
 #[test]
 fn a_flight_recorded_without_flight_rules_reads_as_none() {
-    let flight = Flight::create(Uuid::new_v4(), "YSBK", "YSCN").unwrap();
+    let flight = ysbk_to_yscn();
     let mut json = serde_json::to_value(&flight).unwrap();
     json.as_object_mut().unwrap().remove("flight_rules");
     let back: Flight = serde_json::from_value(json).unwrap();
@@ -178,7 +181,7 @@ fn a_flight_recorded_without_flight_rules_reads_as_none() {
 
 #[test]
 fn a_flight_recorded_with_a_waypoint_for_an_aerodrome_is_refused_with_the_reason() {
-    let flight = Flight::create(Uuid::new_v4(), "YSBK", "YSCN").unwrap();
+    let flight = ysbk_to_yscn();
     let mut json = serde_json::to_value(&flight).unwrap();
     json["departure"] = "YSB".into();
     let error = serde_json::from_value::<Flight>(json).unwrap_err();
