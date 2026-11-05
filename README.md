@@ -3,7 +3,7 @@
 A Rust library of the aviation concepts that ICAO defines the same way for
 every State: an aircraft's type designator and registration marks, a pilot's
 licence, the capacity a pilot serves in on a flight, a flight between two
-significant points and the flight rules it was flown under, and the flight
+aerodromes and the flight rules it was flown under, and the flight
 simulation training devices a session can be flown on. Each is a type that cannot hold an invalid value, so code built on
 it does not have to check them again.
 
@@ -14,8 +14,8 @@ tools, and is the part of them that has no country's rules in it.
 
 ## Status
 
-Early: the version is `0.3.0`. Take it by a caret range from that version
-(`"0.3.0"`): until `1.0` a breaking release is a minor version, as
+Early: the version is `0.4.0`. Take it by a caret range from that version
+(`"0.4.0"`): until `1.0` a breaking release is a minor version, as
 [`INSTRUCTIONS.md`, "Consumers"](INSTRUCTIONS.md#consumers) sets out, though
 releases up to `0.1.3` broke each other as patches. On `main` a
 breaking change lands whenever it gives a better API, together with the changes
@@ -24,7 +24,10 @@ its users need.
 What is covered:
 
 - Value objects: `Waypoint`, `Coordinate`, `SignificantPoint` (a coded
-  designator *or* a latitude and longitude), `FlightDuration`, `FlightRules`,
+  designator *or* a latitude and longitude, for a point on a route),
+  `Aerodrome` (a flight's departure or arrival: listed by its location
+  indicator, or an `UnlistedAerodrome` described by its name, its position or
+  both), `FlightDuration`, `FlightRules`,
   `LocationIndicator` (the four-letter code of ICAO Doc 7910, such as an
   aerodrome's), `AircraftType`, `AircraftRegistration`, `IssuingState` (a
   licence's or a device qualification's, as an ISO 3166-1 alpha-2 code),
@@ -86,7 +89,7 @@ or in `Cargo.toml`:
 
 ```toml
 [dependencies]
-icao-shared-kernel = "0.3.0"
+icao-shared-kernel = "0.4.0"
 ```
 
 To follow `main` instead, depend on it by git and pin a commit with `rev`,

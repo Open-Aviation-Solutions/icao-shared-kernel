@@ -29,6 +29,7 @@ pub mod pilot;
 
 pub use aircraft::{Aircraft, AircraftRegistration, AircraftType};
 pub use error::ValidationError;
+pub use flight::aerodrome::{Aerodrome, UnlistedAerodrome};
 pub use flight::coordinate::Coordinate;
 pub use flight::flight_duration::FlightDuration;
 pub use flight::flight_rules::FlightRules;

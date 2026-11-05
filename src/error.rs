@@ -55,6 +55,11 @@ pub enum ValidationError {
     #[error("location indicator '{0}' must be four uppercase letters")]
     LocationIndicator(String),
 
+    /// An unlisted aerodrome with neither a name nor a position: Doc 4444,
+    /// Appendix 2, Item 18 (`DEP/`, `DEST/`) describes one by either.
+    #[error("an unlisted aerodrome must have a name or a position")]
+    UnlistedAerodrome,
+
     /// A title of licence and a category of aircraft that Annex 1 does not
     /// issue together (Annex 1, 2.3.1, 2.4.1, 2.5, 2.6.3 to 2.6.5, 2.9 and
     /// 2.10). The licence is its name: without its category it is no value

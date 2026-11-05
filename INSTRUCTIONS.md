@@ -47,7 +47,7 @@ test alongside it and record the regulatory basis in the doc comment.
   returning `Result<Self, ValidationError>`; no public way to build an invalid value.
 - Module layout: each aggregate is a module file (`flight.rs`) with a sibling
   directory of the same name holding its value-object submodules
-  (`flight/waypoint.rs`, `flight/coordinate.rs`,
+  (`flight/aerodrome.rs`, `flight/waypoint.rs`, `flight/coordinate.rs`,
   `flight/significant_point.rs`, `flight/flight_duration.rs`,
   `flight/flight_rules.rs`, `flight/location_indicator.rs`;
   `aircraft/aircraft_type.rs`,

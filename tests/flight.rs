@@ -4,7 +4,7 @@
 
 //! Flight aggregate construction, rendering, derived duration, and serialisation.
 
-use icao_shared_kernel::{Coordinate, Flight, FlightDuration, FlightRules, SignificantPoint};
+use icao_shared_kernel::{Aerodrome, Coordinate, Flight, FlightDuration, FlightRules};
 use rstest::rstest;
 use rust_decimal_macros::dec;
 use time::macros::utc_datetime;
@@ -34,8 +34,8 @@ fn duration_is_none_without_both_movements() {
 fn duration_derived_from_movements() {
     let flight = Flight::new(
         Uuid::new_v4(),
-        SignificantPoint::designator("YSBK").unwrap(),
-        SignificantPoint::designator("YSCN").unwrap(),
+        Aerodrome::listed("YSBK").unwrap(),
+        Aerodrome::listed("YSCN").unwrap(),
         Some(utc_datetime!(2026-04-19 03:00)),
         Some(utc_datetime!(2026-04-19 04:30)),
     );
@@ -46,8 +46,8 @@ fn duration_derived_from_movements() {
 fn duration_is_none_when_last_movement_is_before_first() {
     let flight = Flight::new(
         Uuid::new_v4(),
-        SignificantPoint::designator("YSBK").unwrap(),
-        SignificantPoint::designator("YSCN").unwrap(),
+        Aerodrome::listed("YSBK").unwrap(),
+        Aerodrome::listed("YSCN").unwrap(),
         Some(utc_datetime!(2026-04-19 04:30)),
         Some(utc_datetime!(2026-04-19 03:00)),
     );
@@ -58,8 +58,8 @@ fn duration_is_none_when_last_movement_is_before_first() {
 fn duration_is_none_when_last_movement_is_seconds_before_first() {
     let flight = Flight::new(
         Uuid::new_v4(),
-        SignificantPoint::designator("YSBK").unwrap(),
-        SignificantPoint::designator("YSCN").unwrap(),
+        Aerodrome::listed("YSBK").unwrap(),
+        Aerodrome::listed("YSCN").unwrap(),
         Some(utc_datetime!(2026-04-19 03:00:30)),
         Some(utc_datetime!(2026-04-19 03:00:00)),
     );
@@ -76,8 +76,8 @@ fn display_without_movement_time_omits_date() {
 fn display_with_movement_time_shows_date() {
     let flight = Flight::new(
         Uuid::new_v4(),
-        SignificantPoint::designator("YSBK").unwrap(),
-        SignificantPoint::designator("YSCN").unwrap(),
+        Aerodrome::listed("YSBK").unwrap(),
+        Aerodrome::listed("YSCN").unwrap(),
         Some(utc_datetime!(2026-04-19 03:00)),
         None,
     );
@@ -85,19 +85,19 @@ fn display_with_movement_time_shows_date() {
 }
 
 #[rstest]
-#[case("ybth", "YSCN")] // invalid departure designator
-#[case("YSBK", "YS-BK")] // invalid arrival designator
+#[case("ybth", "YSCN")] // invalid departure location indicator
+#[case("YSBK", "YSB")] // invalid arrival location indicator
 fn invalid_designators_rejected(#[case] departure: &str, #[case] arrival: &str) {
     assert!(Flight::create(Uuid::new_v4(), departure, arrival).is_err());
 }
 
 #[test]
-fn coordinate_endpoint_supported() {
+fn unlisted_departure_supported() {
     let coordinate = Coordinate::new(dec!(-33.9461), dec!(151.1772)).unwrap();
     let flight = Flight::new(
         Uuid::new_v4(),
-        SignificantPoint::Coordinate(coordinate),
-        SignificantPoint::designator("YSCN").unwrap(),
+        Aerodrome::unlisted(None, Some(coordinate)).unwrap(),
+        Aerodrome::listed("YSCN").unwrap(),
         None,
         None,
     );
@@ -110,8 +110,8 @@ fn with_preserves_explicit_id() {
     let flight = Flight::with(
         id,
         Uuid::new_v4(),
-        SignificantPoint::designator("YSBK").unwrap(),
-        SignificantPoint::designator("YSCN").unwrap(),
+        Aerodrome::listed("YSBK").unwrap(),
+        Aerodrome::listed("YSCN").unwrap(),
         None,
         None,
     );
@@ -122,8 +122,12 @@ fn with_preserves_explicit_id() {
 fn json_round_trip_preserves_value() {
     let flight = Flight::new(
         Uuid::new_v4(),
-        SignificantPoint::designator("YSBK").unwrap(),
-        SignificantPoint::Coordinate(Coordinate::new(dec!(-33.9461), dec!(151.1772)).unwrap()),
+        Aerodrome::listed("YSBK").unwrap(),
+        Aerodrome::unlisted(
+            Some("Farm strip".to_owned()),
+            Some(Coordinate::new(dec!(-33.9461), dec!(151.1772)).unwrap()),
+        )
+        .unwrap(),
         Some(utc_datetime!(2026-04-19 03:00)),
         Some(utc_datetime!(2026-04-19 04:30)),
     )
