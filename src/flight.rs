@@ -17,7 +17,6 @@ use serde::{Deserialize, Serialize};
 use time::UtcDateTime;
 use uuid::Uuid;
 
-use crate::error::ValidationError;
 use aerodrome::Aerodrome;
 use flight_duration::FlightDuration;
 use flight_rules::FlightRules;
@@ -118,23 +117,6 @@ impl Flight {
             flight_rules,
             ..self
         }
-    }
-
-    /// Convenience constructor from the departure and arrival aerodromes'
-    /// location indicators, validating them and assigning a fresh id with no
-    /// movement times recorded.
-    pub fn create(
-        aircraft_id: Uuid,
-        departure: &str,
-        arrival: &str,
-    ) -> Result<Self, ValidationError> {
-        Ok(Self::new(
-            aircraft_id,
-            Aerodrome::listed(departure)?,
-            Aerodrome::listed(arrival)?,
-            None,
-            None,
-        ))
     }
 
     /// A short route string for showing, e.g. `YSBK-YSCN`: the departure

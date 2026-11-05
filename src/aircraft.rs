@@ -5,15 +5,15 @@
 //! The `Aircraft` aggregate root and its value objects.
 
 mod aircraft_type;
+mod nationality_mark;
 mod registration;
 
 pub use aircraft_type::AircraftType;
+pub use nationality_mark::NationalityMark;
 pub use registration::AircraftRegistration;
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-
-use crate::error::ValidationError;
 
 /// Aircraft reference entity with ICAO-universal identity and descriptors.
 ///
@@ -42,19 +42,6 @@ impl Aircraft {
             aircraft_type,
             registration,
         }
-    }
-
-    /// Convenience constructor from raw strings, validating each part and
-    /// assigning a fresh id.
-    pub fn create(
-        type_designator: &str,
-        nationality: &str,
-        registration: &str,
-    ) -> Result<Self, ValidationError> {
-        Ok(Self::new(
-            AircraftType::parse(type_designator)?,
-            AircraftRegistration::new(nationality, registration)?,
-        ))
     }
 }
 

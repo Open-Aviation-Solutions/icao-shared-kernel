@@ -8,6 +8,18 @@ use icao_shared_kernel::{AircraftType, FlightRules, FstdSession, SignificantPoin
 use time::macros::utc_datetime;
 use uuid::Uuid;
 
+/// A session on `device_id` simulating the `type_designator`, with no route or times.
+fn session_of(device_id: Uuid, type_designator: &str) -> FstdSession {
+    FstdSession::new(
+        device_id,
+        Some(AircraftType::parse(type_designator).unwrap()),
+        None,
+        None,
+        None,
+        None,
+    )
+}
+
 fn point(designator: &str) -> SignificantPoint {
     SignificantPoint::designator(designator).expect("should be valid")
 }
@@ -102,8 +114,8 @@ fn one_device_can_simulate_different_types_across_sessions() {
     // An unqualified personal device is not bound to a single simulated
     // aircraft, so the type is recorded per session rather than on the device.
     let device_id = Uuid::new_v4();
-    let cessna = FstdSession::create(device_id, "C172").unwrap();
-    let boeing = FstdSession::create(device_id, "B738").unwrap();
+    let cessna = session_of(device_id, "C172");
+    let boeing = session_of(device_id, "B738");
 
     assert_eq!(cessna.device_id, boeing.device_id);
     assert_eq!(
@@ -114,11 +126,6 @@ fn one_device_can_simulate_different_types_across_sessions() {
         boeing.simulated_aircraft_type.unwrap(),
         AircraftType::parse("B738").unwrap()
     );
-}
-
-#[test]
-fn create_rejects_an_invalid_type_designator() {
-    assert!(FstdSession::create(Uuid::new_v4(), "c172").is_err());
 }
 
 #[test]
@@ -152,7 +159,7 @@ fn session_round_trips_through_json() {
 
 #[test]
 fn a_session_recorded_without_flight_rules_reads_as_none() {
-    let session = FstdSession::create(Uuid::new_v4(), "C172").unwrap();
+    let session = session_of(Uuid::new_v4(), "C172");
     let mut json = serde_json::to_value(&session).unwrap();
     json.as_object_mut().unwrap().remove("flight_rules");
     let back: FstdSession = serde_json::from_value(json).unwrap();

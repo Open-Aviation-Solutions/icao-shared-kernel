@@ -96,15 +96,27 @@ To follow `main` instead, depend on it by git and pin a commit with `rev`,
 since `main` can change its API at any time.
 
 ```rust
-use icao_shared_kernel::{Aircraft, Flight, ValidationError};
+use icao_shared_kernel::{
+    Aerodrome, Aircraft, AircraftRegistration, AircraftType, Flight,
+    NationalityMark, ValidationError,
+};
 
 fn main() -> Result<(), ValidationError> {
-    let aircraft = Aircraft::create("C172", "VH", "ABC")?;
-    let flight = Flight::create(aircraft.id, "YSBK", "YSCN")?;
+    let aircraft = Aircraft::new(
+        AircraftType::parse("C172")?,
+        AircraftRegistration::new(NationalityMark::parse("VH")?, "ABC")?,
+    );
+    let flight = Flight::new(
+        aircraft.id,
+        Aerodrome::listed("YSBK")?,
+        Aerodrome::listed("YSCN")?,
+        None,
+        None,
+    );
     assert_eq!(flight.route_summary(), "YSBK-YSCN");
 
-    // A designator that is not one is refused, not stored.
-    assert!(Aircraft::create("cessna", "VH", "ABC").is_err());
+    // A designator that is not one is refused when parsed, so no `Aircraft` can hold it.
+    assert!(AircraftType::parse("cessna").is_err());
     Ok(())
 }
 ```
