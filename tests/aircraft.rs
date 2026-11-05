@@ -60,3 +60,22 @@ fn invalid_designators_rejected(#[case] value: &str) {
         "{value:?} should be rejected"
     );
 }
+
+#[rstest]
+#[case("", "ABC")] // nationality too short
+#[case("VHX", "ABC")] // nationality too long
+#[case("VH", "")] // registration too short
+#[case("VH", "ABCDEF")] // registration too long
+fn registration_marks_out_of_bounds_refused(#[case] nationality: &str, #[case] registration: &str) {
+    assert!(AircraftRegistration::new(nationality, registration).is_err());
+
+    let json = format!(r#"{{"nationality":"{nationality}","registration":"{registration}"}}"#);
+    assert!(serde_json::from_str::<AircraftRegistration>(&json).is_err());
+}
+
+#[rstest]
+#[case("N", "1")]
+#[case("VH", "ABCDE")]
+fn registration_marks_at_bounds_accepted(#[case] nationality: &str, #[case] registration: &str) {
+    assert!(AircraftRegistration::new(nationality, registration).is_ok());
+}

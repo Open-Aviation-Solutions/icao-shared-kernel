@@ -106,7 +106,7 @@ fn main() -> Result<(), ValidationError> {
     let flight = Flight::create(aircraft.id, "YSBK", "YSCN")?;
     assert_eq!(flight.route_summary(), "YSBK-YSCN");
 
-    // A designator that is not one is refused, not stored.
+    // A designator that is not one is refused when parsed, so no `Aircraft` can hold it.
     assert!(AircraftType::parse("cessna").is_err());
     Ok(())
 }
