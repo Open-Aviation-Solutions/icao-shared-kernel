@@ -19,8 +19,9 @@ use crate::error::ValidationError;
 /// departure and destination aerodromes by their Doc 7910 location
 /// indicators (Items 13 and 16), and for one that has none it gives `ZZZZ`
 /// there and describes the aerodrome in Item 18 (`DEP/`, `DEST/`), by its
-/// name or its position. `ZZZZ` is not held here: an [`Unlisted`] aerodrome
-/// holds the description directly.
+/// name or its position. `ZZZZ` is not held here, and is refused as a
+/// location indicator: an [`Unlisted`] aerodrome holds the description
+/// directly.
 ///
 /// On the wire a listed aerodrome is its bare location indicator (`"YSBK"`),
 /// and an unlisted one an object (see [`UnlistedAerodrome`]). Reading one

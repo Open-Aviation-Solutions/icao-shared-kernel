@@ -8,22 +8,33 @@ use serde::{Deserialize, Serialize};
 
 use crate::error::{is_ascii_uppercase_of_len, ValidationError};
 
+/// Doc 4444's mark for an aerodrome with no location indicator.
+const NO_LOCATION_INDICATOR: &str = "ZZZZ";
+
 /// An ICAO location indicator, such as an aerodrome's (e.g. `YSBK`, `KJFK`):
 /// the four-letter code group that ICAO Doc 7910 lists.
 ///
-/// Checked by shape only: exactly four ASCII uppercase letters. Its leading
+/// Checked by shape: exactly four ASCII uppercase letters. Its leading
 /// letters are not checked against Doc 7910's regions, nor the indicator
-/// against the list. Serialises as the plain code.
+/// against the list. `ZZZZ` is refused: it is not an indicator but ICAO Doc
+/// 4444's mark, in a flight plan (Appendix 2, Items 13 and 16), for an
+/// aerodrome that has none, which is then described in Item 18 (an
+/// [`UnlistedAerodrome`](crate::UnlistedAerodrome)). Serialises as the plain
+/// code.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(try_from = "String", into = "String")]
 pub struct LocationIndicator(String);
 
 impl LocationIndicator {
-    /// Parse a location indicator: exactly four ASCII uppercase letters.
+    /// Parse a location indicator: exactly four ASCII uppercase letters,
+    /// other than `ZZZZ`.
     pub fn parse(value: impl Into<String>) -> Result<Self, ValidationError> {
         let value = value.into();
         if !is_ascii_uppercase_of_len(&value, 4) {
             return Err(ValidationError::LocationIndicator(value));
+        }
+        if value == NO_LOCATION_INDICATOR {
+            return Err(ValidationError::NoLocationIndicator);
         }
         Ok(Self(value))
     }

@@ -41,6 +41,17 @@ fn anything_else_is_refused(#[case] value: &str) {
 }
 
 #[test]
+fn zzzz_is_refused_as_the_mark_for_no_location_indicator() {
+    let error = LocationIndicator::parse("ZZZZ").unwrap_err();
+    assert_eq!(error, ValidationError::NoLocationIndicator);
+    assert_eq!(
+        error.to_string(),
+        "'ZZZZ' means the aerodrome has no location indicator: describe it as \
+         an unlisted aerodrome instead, by its name or its position"
+    );
+}
+
+#[test]
 fn it_serialises_as_the_plain_code() {
     let indicator: LocationIndicator = serde_json::from_value(json!("YSBK")).unwrap();
     assert_eq!(serde_json::to_value(indicator).unwrap(), json!("YSBK"));

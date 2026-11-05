@@ -65,6 +65,15 @@ pub enum ValidationError {
     #[error("an unlisted aerodrome must have a name or a position")]
     UnlistedAerodrome,
 
+    /// `ZZZZ` given as a location indicator: ICAO Doc 4444's mark, in a
+    /// flight plan (Appendix 2, Items 13 and 16), for an aerodrome with no
+    /// location indicator, which Item 18 then describes.
+    #[error(
+        "'ZZZZ' means the aerodrome has no location indicator: describe it as \
+         an unlisted aerodrome instead, by its name or its position"
+    )]
+    NoLocationIndicator,
+
     /// A title of licence and a category of aircraft that Annex 1 does not
     /// issue together (Annex 1, 2.3.1, 2.4.1, 2.5, 2.6.3 to 2.6.5, 2.9 and
     /// 2.10). The licence is its name: without its category it is no value

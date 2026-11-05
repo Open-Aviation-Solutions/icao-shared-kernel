@@ -40,6 +40,19 @@ fn a_designator_that_is_not_a_location_indicator_is_refused(#[case] value: &str)
     );
 }
 
+#[test]
+fn zzzz_is_refused_as_a_listed_aerodrome() {
+    assert_eq!(
+        Aerodrome::listed("ZZZZ").unwrap_err(),
+        ValidationError::NoLocationIndicator
+    );
+    let error = serde_json::from_value::<Aerodrome>(json!("ZZZZ")).unwrap_err();
+    assert_eq!(
+        error.to_string(),
+        ValidationError::NoLocationIndicator.to_string()
+    );
+}
+
 #[rstest]
 #[case(Some("Farm strip"), None, "Farm strip")]
 #[case(None, Some(position()), "-33.9461,151.1772")]

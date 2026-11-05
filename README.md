@@ -51,8 +51,8 @@ Known limits:
 
 - Values are checked for their form, not against the lists they come from. A
   type designator is checked for the shape of ICAO Doc 8643's designators, not
-  looked up in it; a location indicator is four capital letters, not looked
-  up in ICAO Doc 7910 or checked against its regions; an issuing State is two
+  looked up in it; a location indicator is four capital letters other than
+  `ZZZZ`, not looked up in ICAO Doc 7910 or checked against its regions; an issuing State is two
   capital letters, not checked against ISO 3166-1; a waypoint's designator is
   not checked against any State's published list.
 - The types serialise with serde, but that JSON is not a stored format that is
