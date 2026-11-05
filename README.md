@@ -35,7 +35,7 @@ What is covered:
   `AircraftCategory`), `Capacity` (the capacity a pilot serves in on a
   flight, in Annex 1's terms), `MinimumAges` (the minimum age for each title of
   licence, Annex 1's by default), `FstdKind`,
-  `DeviceDesignation`, `DeviceQualification`, and the public `validate_waypoint_code` function.
+  `DeviceDesignation` and `DeviceQualification`.
 - Aggregates: `Flight`, `Aircraft`, `Pilot`, `FlightSimulationTrainingDevice`
   and `FstdSession`.
 - One error type, `ValidationError`, with a variant for each rule.

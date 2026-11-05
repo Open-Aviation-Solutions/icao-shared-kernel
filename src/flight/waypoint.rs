@@ -32,13 +32,12 @@ impl Waypoint {
 
 /// Validate a single waypoint designator: uppercase alphanumeric, length 2–5.
 ///
-/// Public so consumer domains that store their own waypoint lists can call it
-/// and stay in lockstep with the kernel.
+/// Private: `Waypoint::parse` is how a caller checks a waypoint.
 ///
 /// Every character must be ASCII `A`–`Z` or `0`–`9`, and there must be at least
 /// one letter (an all-digit code is rejected). Length is checked first, so the
 /// error distinguishes the two failure modes.
-pub fn validate_waypoint_code(waypoint: &str) -> Result<(), ValidationError> {
+fn validate_waypoint_code(waypoint: &str) -> Result<(), ValidationError> {
     let len = waypoint.chars().count();
     if !(2..=5).contains(&len) {
         return Err(ValidationError::WaypointLength(waypoint.to_string()));
