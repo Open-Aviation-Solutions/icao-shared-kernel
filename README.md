@@ -98,13 +98,13 @@ since `main` can change its API at any time.
 ```rust
 use icao_shared_kernel::{
     Aerodrome, Aircraft, AircraftRegistration, AircraftType, Flight,
-    ValidationError,
+    NationalityMark, ValidationError,
 };
 
 fn main() -> Result<(), ValidationError> {
     let aircraft = Aircraft::new(
         AircraftType::parse("C172")?,
-        AircraftRegistration::new("VH", "ABC")?,
+        AircraftRegistration::new(NationalityMark::parse("VH")?, "ABC")?,
     );
     let flight = Flight::new(
         aircraft.id,

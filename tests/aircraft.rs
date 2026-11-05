@@ -4,7 +4,7 @@
 
 //! Aircraft type, registration, and aggregate behaviour.
 
-use icao_shared_kernel::{Aircraft, AircraftRegistration, AircraftType};
+use icao_shared_kernel::{Aircraft, AircraftRegistration, AircraftType, NationalityMark};
 use rstest::rstest;
 use uuid::Uuid;
 
@@ -14,15 +14,15 @@ fn with_preserves_explicit_id() {
     let aircraft = Aircraft::with(
         id,
         AircraftType::parse("C172").unwrap(),
-        AircraftRegistration::new("VH", "XYZ").unwrap(),
+        AircraftRegistration::new(NationalityMark::parse("VH").unwrap(), "XYZ").unwrap(),
     );
     assert_eq!(aircraft.id, id);
 }
 
 #[test]
 fn registration_renders_and_exposes_marks() {
-    let reg = AircraftRegistration::new("VH", "ABC").unwrap();
-    assert_eq!(reg.nationality(), "VH");
+    let reg = AircraftRegistration::new(NationalityMark::parse("VH").unwrap(), "ABC").unwrap();
+    assert_eq!(reg.nationality().as_str(), "VH");
     assert_eq!(reg.registration(), "ABC");
     assert_eq!(reg.to_string(), "VH-ABC");
 }
@@ -31,7 +31,7 @@ fn registration_renders_and_exposes_marks() {
 fn aircraft_creation_and_display() {
     let aircraft = Aircraft::new(
         AircraftType::parse("C172").unwrap(),
-        AircraftRegistration::new("VH", "XYZ").unwrap(),
+        AircraftRegistration::new(NationalityMark::parse("VH").unwrap(), "XYZ").unwrap(),
     );
     assert_eq!(aircraft.aircraft_type.as_str(), "C172");
     assert_eq!(aircraft.to_string(), "C172 VH-XYZ");
@@ -62,20 +62,48 @@ fn invalid_designators_rejected(#[case] value: &str) {
 }
 
 #[rstest]
-#[case("", "ABC")] // nationality too short
-#[case("VHX", "ABC")] // nationality too long
-#[case("VH", "")] // registration too short
-#[case("VH", "ABCDEF")] // registration too long
-fn registration_marks_out_of_bounds_refused(#[case] nationality: &str, #[case] registration: &str) {
-    assert!(AircraftRegistration::new(nationality, registration).is_err());
-
-    let json = format!(r#"{{"nationality":"{nationality}","registration":"{registration}"}}"#);
-    assert!(serde_json::from_str::<AircraftRegistration>(&json).is_err());
+#[case("")] // too short
+#[case("VHX")] // too long
+fn nationality_mark_out_of_bounds_refused(#[case] value: &str) {
+    assert!(NationalityMark::parse(value).is_err());
 }
 
 #[rstest]
-#[case("N", "1")]
-#[case("VH", "ABCDE")]
-fn registration_marks_at_bounds_accepted(#[case] nationality: &str, #[case] registration: &str) {
-    assert!(AircraftRegistration::new(nationality, registration).is_ok());
+#[case("N")]
+#[case("VH")]
+fn nationality_mark_at_bounds_accepted(#[case] value: &str) {
+    assert_eq!(NationalityMark::parse(value).unwrap().as_str(), value);
+}
+
+#[rstest]
+#[case("VH", "")] // registration too short
+#[case("VH", "ABCDEF")] // registration too long
+fn registration_mark_out_of_bounds_refused(#[case] nationality: &str, #[case] registration: &str) {
+    let nationality = NationalityMark::parse(nationality).unwrap();
+    assert!(AircraftRegistration::new(nationality, registration).is_err());
+
+    let json = format!(r#"{{"nationality":"VH","registration":"{registration}"}}"#);
+    assert!(serde_json::from_str::<AircraftRegistration>(&json).is_err());
+}
+
+#[test]
+fn registration_mark_at_bounds_accepted() {
+    let nationality = NationalityMark::parse("N").unwrap();
+    assert!(AircraftRegistration::new(nationality, "ABCDE").is_ok());
+}
+
+#[rstest]
+#[case("")]
+#[case("VHX")]
+fn bad_nationality_mark_from_json_refused(#[case] nationality: &str) {
+    let json = format!(r#"{{"nationality":"{nationality}","registration":"ABC"}}"#);
+    assert!(serde_json::from_str::<AircraftRegistration>(&json).is_err());
+}
+
+#[test]
+fn registration_json_shape_is_unchanged() {
+    let json = r#"{"nationality":"VH","registration":"ABC"}"#;
+    let reg: AircraftRegistration = serde_json::from_str(json).unwrap();
+    assert_eq!(reg.to_string(), "VH-ABC");
+    assert_eq!(serde_json::to_string(&reg).unwrap(), json);
 }

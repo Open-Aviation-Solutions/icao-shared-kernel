@@ -6,25 +6,25 @@
 
 use serde::{Deserialize, Serialize};
 
+use super::NationalityMark;
 use crate::error::{check_length, ValidationError};
 
 /// Aircraft nationality and registration marks (ICAO Annex 7).
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(try_from = "RegistrationData", into = "RegistrationData")]
 pub struct AircraftRegistration {
-    nationality: String,
+    nationality: NationalityMark,
     registration: String,
 }
 
 impl AircraftRegistration {
-    /// Build registration marks, validating the Annex 7 length bounds.
+    /// Build registration marks from a nationality mark and a registration
+    /// mark, validating the registration mark's Annex 7 length bound.
     pub fn new(
-        nationality: impl Into<String>,
+        nationality: NationalityMark,
         registration: impl Into<String>,
     ) -> Result<Self, ValidationError> {
-        let nationality = nationality.into();
         let registration = registration.into();
-        check_length("nationality", &nationality, 1, 2)?;
         check_length("registration", &registration, 1, 5)?;
         Ok(Self {
             nationality,
@@ -32,8 +32,8 @@ impl AircraftRegistration {
         })
     }
 
-    /// The one- or two-character nationality mark (e.g. `VH`, `N`, `G`).
-    pub fn nationality(&self) -> &str {
+    /// The nationality mark (e.g. `VH`, `N`, `G`).
+    pub fn nationality(&self) -> &NationalityMark {
         &self.nationality
     }
 
@@ -66,14 +66,14 @@ impl TryFrom<RegistrationData> for AircraftRegistration {
     type Error = ValidationError;
 
     fn try_from(data: RegistrationData) -> Result<Self, Self::Error> {
-        Self::new(data.nationality, data.registration)
+        Self::new(NationalityMark::parse(data.nationality)?, data.registration)
     }
 }
 
 impl From<AircraftRegistration> for RegistrationData {
     fn from(value: AircraftRegistration) -> Self {
         Self {
-            nationality: value.nationality,
+            nationality: value.nationality.into(),
             registration: value.registration,
         }
     }

@@ -5,9 +5,11 @@
 //! The `Aircraft` aggregate root and its value objects.
 
 mod aircraft_type;
+mod nationality_mark;
 mod registration;
 
 pub use aircraft_type::AircraftType;
+pub use nationality_mark::NationalityMark;
 pub use registration::AircraftRegistration;
 
 use serde::{Deserialize, Serialize};

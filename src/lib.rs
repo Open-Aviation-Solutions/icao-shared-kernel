@@ -27,7 +27,7 @@ mod iso_date;
 pub mod issuing_state;
 pub mod pilot;
 
-pub use aircraft::{Aircraft, AircraftRegistration, AircraftType};
+pub use aircraft::{Aircraft, AircraftRegistration, AircraftType, NationalityMark};
 pub use error::ValidationError;
 pub use flight::aerodrome::{Aerodrome, UnlistedAerodrome};
 pub use flight::coordinate::Coordinate;
