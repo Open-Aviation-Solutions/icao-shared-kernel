@@ -24,6 +24,7 @@ pub mod flight;
 pub mod fstd;
 pub mod fstd_session;
 mod iso_date;
+pub mod issuing_state;
 pub mod pilot;
 
 pub use aircraft::{Aircraft, AircraftRegistration, AircraftType};
@@ -31,11 +32,13 @@ pub use error::ValidationError;
 pub use flight::coordinate::Coordinate;
 pub use flight::flight_duration::FlightDuration;
 pub use flight::flight_rules::FlightRules;
+pub use flight::location_indicator::LocationIndicator;
 pub use flight::significant_point::SignificantPoint;
 pub use flight::waypoint::{validate_waypoint_code, Waypoint};
 pub use flight::Flight;
 pub use fstd::{DeviceDesignation, DeviceQualification, FlightSimulationTrainingDevice, FstdKind};
 pub use fstd_session::FstdSession;
+pub use issuing_state::IssuingState;
 pub use pilot::{
     AircraftCategory, AirlineTransportCategory, Capacity, IssuedTitle, Licence, LicenceTitle,
     MinimumAges, Pilot, PrivateOrCommercialCategory,

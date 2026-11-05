@@ -112,7 +112,7 @@ impl Pilot {
         });
         if let Some(licence) = repeated {
             return Err(ValidationError::RepeatedLicence {
-                issuing_state: licence.issuing_state().to_owned(),
+                issuing_state: licence.issuing_state().as_str().to_owned(),
                 issuing_authority: licence.issuing_authority().to_owned(),
                 number: licence.number().to_owned(),
             });
@@ -123,7 +123,7 @@ impl Pilot {
                 let age = minimum_ages::age_on(date_of_birth, issued.date_of_first_issue);
                 if age < i32::from(minimum_age) {
                     return Err(ValidationError::UnderMinimumAge {
-                        issuing_state: licence.issuing_state().to_owned(),
+                        issuing_state: licence.issuing_state().as_str().to_owned(),
                         issuing_authority: licence.issuing_authority().to_owned(),
                         number: licence.number().to_owned(),
                         title: issued.title,

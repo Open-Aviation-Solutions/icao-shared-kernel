@@ -49,19 +49,24 @@ test alongside it and record the regulatory basis in the doc comment.
   directory of the same name holding its value-object submodules
   (`flight/waypoint.rs`, `flight/coordinate.rs`,
   `flight/significant_point.rs`, `flight/flight_duration.rs`,
-  `flight/flight_rules.rs`; `aircraft/aircraft_type.rs`,
+  `flight/flight_rules.rs`, `flight/location_indicator.rs`;
+  `aircraft/aircraft_type.rs`,
   `aircraft/registration.rs`; `pilot/licence.rs`, `pilot/licence_title.rs`,
   `pilot/aircraft_category.rs`, `pilot/capacity.rs`,
   `pilot/minimum_ages.rs`; `fstd/designation.rs`, `fstd/qualification.rs`).
   An aggregate with no value objects of its own has no sibling directory
-  (`fstd_session.rs`). `lib.rs` re-exports the value objects so the public
-  API stays flat.
+  (`fstd_session.rs`). A value object that more than one aggregate holds is
+  a public module file of its own at the top (`issuing_state.rs`, held by
+  `Licence` and `DeviceQualification`). `lib.rs` re-exports the value objects so the
+  public API stays flat.
 
 ## Consumers
 
-`pilot-logbook` and `au-casa` depend on this crate; au-casa takes `LicenceTitle`
-for its titles of licence, and its simulator classification (its task `0002`)
-is to build on the FSTD aggregates. `icao-shared-kernel-py`, the Python
+`pilot-logbook`, `au-casa` and `logbook-shared-kernel` depend on this crate;
+au-casa takes `LicenceTitle` for its titles of licence, and its simulator
+classification (its task `0002`) is to build on the FSTD aggregates.
+logbook-shared-kernel takes `LocationIndicator` for an approach's aerodrome
+and `IssuingState` for an authority's State. `icao-shared-kernel-py`, the Python
 bindings, is archived and no longer follows this crate's releases.
 
 Choose the best API, not the compatible one: while the crate is on `0.x`, a

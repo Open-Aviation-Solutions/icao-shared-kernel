@@ -5,8 +5,8 @@
 //! The titles of licence held under a licence, and their dates of first issue.
 
 use icao_shared_kernel::{
-    AircraftCategory, IssuedTitle, Licence, LicenceTitle, PrivateOrCommercialCategory,
-    ValidationError,
+    AircraftCategory, IssuedTitle, IssuingState, Licence, LicenceTitle,
+    PrivateOrCommercialCategory, ValidationError,
 };
 use rstest::rstest;
 use serde_json::json;
@@ -20,7 +20,7 @@ fn private_aeroplane() -> LicenceTitle {
 fn holds_each_title_from_its_own_date() {
     // Annex 1, 2.1.1.2.1: one licence can carry more than one licence's title.
     let licence = Licence::new(
-        "AU",
+        IssuingState::parse("AU").unwrap(),
         "CASA",
         "12345",
         vec![
@@ -49,13 +49,13 @@ fn holds_each_title_from_its_own_date() {
 #[test]
 fn a_licence_may_hold_no_annex_1_title() {
     // Its titles may all be a State's own, which are kept downstream.
-    assert!(Licence::new("AU", "CASA", "12345", vec![]).is_ok());
+    assert!(Licence::new(IssuingState::parse("AU").unwrap(), "CASA", "12345", vec![]).is_ok());
 }
 
 #[test]
 fn a_title_listed_twice_is_refused() {
     let error = Licence::new(
-        "AU",
+        IssuingState::parse("AU").unwrap(),
         "CASA",
         "12345",
         vec![
@@ -163,7 +163,8 @@ fn a_title_annex_1_does_not_issue_is_named_in_full() {
 fn the_order_titles_are_listed_in_does_not_matter() {
     let private = IssuedTitle::new(private_aeroplane(), date!(2015 - 04 - 01));
     let glider = IssuedTitle::new(LicenceTitle::Glider, date!(2016 - 04 - 01));
-    let licence = |titles| Licence::new("AU", "CASA", "12345", titles).unwrap();
+    let licence =
+        |titles| Licence::new(IssuingState::parse("AU").unwrap(), "CASA", "12345", titles).unwrap();
     assert_eq!(
         licence(vec![private.clone(), glider.clone()]),
         licence(vec![glider, private])
