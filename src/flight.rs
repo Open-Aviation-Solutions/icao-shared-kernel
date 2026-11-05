@@ -6,7 +6,6 @@
 //! flight event — and its flight-scoped value objects.
 
 pub mod aerodrome;
-pub mod approach_type;
 pub mod coordinate;
 pub mod flight_duration;
 pub mod flight_rules;

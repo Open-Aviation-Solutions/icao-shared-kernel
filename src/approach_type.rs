@@ -7,10 +7,15 @@
 
 use serde::{Deserialize, Serialize};
 
-/// The type of an instrument approach procedure, in ICAO's terms. Whether it
-/// is a 2D or a 3D approach operation (the classes of approach operation in
-/// Annex 6) is derived by [`is_3d`](Self::is_3d), not stored; how an authority
-/// counts it is that authority's reading.
+/// The type of an instrument approach procedure, in ICAO's terms. Whether
+/// flying it is a 2D or a 3D approach operation (the classes of approach
+/// operation in Annex 6) is derived by [`is_3d`](Self::is_3d), not stored; how
+/// an authority counts it is that authority's reading.
+///
+/// This is the procedure, not the operation flown: [`is_3d`](Self::is_3d) is
+/// the class of the procedure flown straight in to its own minima. An approach
+/// that ends in a circling manoeuvre to an MDA/H is a 2D operation whatever
+/// the procedure, and is not distinguished here.
 ///
 /// A procedure particular to one State (an Australian DME or GNSS arrival, say)
 /// is recorded in that authority's section, not here. There is no `Mls` value
@@ -20,7 +25,7 @@ use serde::{Deserialize, Serialize};
 /// its rules should be made to handle each new value, not fall into a
 /// wildcard.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
+#[serde(rename_all = "kebab-case", deny_unknown_fields)]
 pub enum ApproachType {
     /// A non-directional beacon approach: a 2D approach operation.
     Ndb,
@@ -63,8 +68,10 @@ pub enum RnpApchMinima {
 }
 
 impl ApproachType {
-    /// Whether this is a 3D approach operation (lateral and vertical
-    /// guidance, Annex 6), as against a 2D one (lateral guidance only).
+    /// Whether this procedure, flown straight in to its own minima, is a 3D
+    /// approach operation (lateral and vertical guidance, Annex 6), as against
+    /// a 2D one (lateral guidance only). A circling approach is not
+    /// distinguished.
     pub fn is_3d(self) -> bool {
         match self {
             Self::Ndb | Self::Vor | Self::Localizer => false,

@@ -27,7 +27,10 @@ What is covered:
   designator *or* a latitude and longitude, for a point on a route),
   `Aerodrome` (a flight's departure or arrival: listed by its location
   indicator, or an `UnlistedAerodrome` described by its name, its position or
-  both), `FlightDuration`, `FlightRules`, `ApproachType` (an instrument approach's type, with `RnpApchMinima`, and whether it is a 3D approach operation),
+  both), `FlightDuration`, `FlightRules`,
+  `ApproachType` (an instrument approach procedure's type, with
+  `RnpApchMinima`, and whether flown straight in it is a 3D approach
+  operation),
   `LocationIndicator` (the four-letter code of ICAO Doc 7910, such as an
   aerodrome's), `AircraftType`, `AircraftRegistration`, `IssuingState` (a
   licence's or a device qualification's, as an ISO 3166-1 alpha-2 code),
