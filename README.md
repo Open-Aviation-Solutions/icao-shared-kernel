@@ -112,7 +112,7 @@ regulatory source (an ICAO Annex or Document), and each rule has a test under
 
 ## Other repositories
 
-- **icao-shared-kernel-py** is its Python bindings.
+- **icao-shared-kernel-py** was its Python bindings, and is archived.
 - **[au-casa](https://github.com/Open-Aviation-Solutions/au-casa)** holds
   Australia's rules (CASA Part 61), which are kept out of this crate.
 
