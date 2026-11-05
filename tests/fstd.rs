@@ -5,7 +5,7 @@
 //! Device designation, qualification validity, and aggregate behaviour.
 
 use icao_shared_kernel::{
-    DeviceDesignation, DeviceQualification, FlightSimulationTrainingDevice, FstdKind,
+    DeviceDesignation, DeviceQualification, FlightSimulationTrainingDevice, FstdKind, IssuingState,
 };
 use rstest::rstest;
 use time::macros::date;
@@ -13,8 +13,14 @@ use time::Date;
 use uuid::Uuid;
 
 fn casa_qualification(valid_from: Date, valid_until: Date) -> DeviceQualification {
-    DeviceQualification::new("AU", "CASA", "Level D", valid_from, valid_until)
-        .expect("should be valid")
+    DeviceQualification::new(
+        IssuingState::parse("AU").unwrap(),
+        "CASA",
+        "Level D",
+        valid_from,
+        valid_until,
+    )
+    .expect("should be valid")
 }
 
 #[test]
@@ -60,7 +66,7 @@ fn empty_designation_rejected() {
 #[test]
 fn qualification_period_ending_before_it_starts_rejected() {
     let result = DeviceQualification::new(
-        "AU",
+        IssuingState::parse("AU").unwrap(),
         "CASA",
         "Level D",
         date!(2026 - 03 - 01),
@@ -70,27 +76,11 @@ fn qualification_period_ending_before_it_starts_rejected() {
 }
 
 #[rstest]
-#[case("au")] // lowercase
-#[case("AUS")] // three letters
-#[case("A")] // single letter
-#[case("")] // empty
-fn qualification_rejects_malformed_issuing_state(#[case] state: &str) {
-    let result = DeviceQualification::new(
-        state,
-        "CASA",
-        "Level D",
-        date!(2026 - 01 - 01),
-        date!(2026 - 12 - 31),
-    );
-    assert!(result.is_err(), "{state:?} should be rejected");
-}
-
-#[rstest]
 #[case("", "Level D")] // empty authority
 #[case("CASA", "")] // empty level
 fn qualification_rejects_empty_fields(#[case] authority: &str, #[case] level: &str) {
     let result = DeviceQualification::new(
-        "AU",
+        IssuingState::parse("AU").unwrap(),
         authority,
         level,
         date!(2026 - 01 - 01),

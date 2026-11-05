@@ -8,6 +8,7 @@
 pub mod coordinate;
 pub mod flight_duration;
 pub mod flight_rules;
+pub mod location_indicator;
 pub mod significant_point;
 pub mod waypoint;
 

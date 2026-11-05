@@ -7,7 +7,8 @@
 use serde::{Deserialize, Serialize};
 use time::Date;
 
-use crate::error::{check_issuing_state, check_non_empty, check_validity_period, ValidationError};
+use crate::error::{check_non_empty, check_validity_period, ValidationError};
+use crate::IssuingState;
 
 /// A qualification granted to a training device by a national aviation
 /// authority, valid over a bounded period.
@@ -28,7 +29,7 @@ use crate::error::{check_issuing_state, check_non_empty, check_validity_period, 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(try_from = "DeviceQualificationData", into = "DeviceQualificationData")]
 pub struct DeviceQualification {
-    issuing_state: String,
+    issuing_state: IssuingState,
     issuing_authority: String,
     level: String,
     valid_from: Date,
@@ -36,20 +37,17 @@ pub struct DeviceQualification {
 }
 
 impl DeviceQualification {
-    /// Build a qualification, validating the issuing State is an ISO 3166-1
-    /// alpha-2 code, that the authority and level are non-empty, and that the
-    /// validity period does not end before it starts.
+    /// Build a qualification, validating that the authority and level are
+    /// non-empty, and that the validity period does not end before it starts.
     pub fn new(
-        issuing_state: impl Into<String>,
+        issuing_state: IssuingState,
         issuing_authority: impl Into<String>,
         level: impl Into<String>,
         valid_from: Date,
         valid_until: Date,
     ) -> Result<Self, ValidationError> {
-        let issuing_state = issuing_state.into();
         let issuing_authority = issuing_authority.into();
         let level = level.into();
-        check_issuing_state(&issuing_state)?;
         check_non_empty("issuing_authority", &issuing_authority)?;
         check_non_empty("level", &level)?;
         check_validity_period(valid_from, valid_until)?;
@@ -64,7 +62,7 @@ impl DeviceQualification {
 
     /// The ISO 3166-1 alpha-2 code of the State whose authority qualified the
     /// device.
-    pub fn issuing_state(&self) -> &str {
+    pub fn issuing_state(&self) -> &IssuingState {
         &self.issuing_state
     }
 
@@ -108,7 +106,7 @@ impl DeviceQualification {
 // `Licence`.
 #[derive(Serialize, Deserialize)]
 struct DeviceQualificationData {
-    issuing_state: String,
+    issuing_state: IssuingState,
     issuing_authority: String,
     level: String,
     #[serde(with = "crate::iso_date")]

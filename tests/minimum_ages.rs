@@ -6,7 +6,7 @@
 //! 2.5.1.1, 2.6.1.1, 2.9.1.1 and 2.10.1.1), and a State's own in its place.
 
 use icao_shared_kernel::{
-    AirlineTransportCategory, IssuedTitle, Licence, LicenceTitle, MinimumAges, Pilot,
+    AirlineTransportCategory, IssuedTitle, IssuingState, Licence, LicenceTitle, MinimumAges, Pilot,
     PrivateOrCommercialCategory, ValidationError,
 };
 use rstest::rstest;
@@ -22,7 +22,13 @@ fn private_aeroplane() -> LicenceTitle {
 }
 
 fn licence(title: LicenceTitle, issued: Date) -> Licence {
-    Licence::new("AU", "CASA", "12345", vec![IssuedTitle::new(title, issued)]).unwrap()
+    Licence::new(
+        IssuingState::parse("AU").unwrap(),
+        "CASA",
+        "12345",
+        vec![IssuedTitle::new(title, issued)],
+    )
+    .unwrap()
 }
 
 fn pilot(born: Date, title: LicenceTitle, issued: Date) -> Result<Pilot, ValidationError> {

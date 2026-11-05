@@ -14,8 +14,8 @@ tools, and is the part of them that has no country's rules in it.
 
 ## Status
 
-Early: the version is `0.2.0`. Take it by a caret range from that version
-(`"0.2.0"`): until `1.0` a breaking release is a minor version, as
+Early: the version is `0.3.0`. Take it by a caret range from that version
+(`"0.3.0"`): until `1.0` a breaking release is a minor version, as
 [`INSTRUCTIONS.md`, "Consumers"](INSTRUCTIONS.md#consumers) sets out, though
 releases up to `0.1.3` broke each other as patches. On `main` a
 breaking change lands whenever it gives a better API, together with the changes
@@ -25,8 +25,10 @@ What is covered:
 
 - Value objects: `Waypoint`, `Coordinate`, `SignificantPoint` (a coded
   designator *or* a latitude and longitude), `FlightDuration`, `FlightRules`,
-  `AircraftType`, `AircraftRegistration`, `Licence` (with the titles of
-  licence held under it: `IssuedTitle`, `LicenceTitle` and its categories,
+  `LocationIndicator` (the four-letter code of ICAO Doc 7910, such as an
+  aerodrome's), `AircraftType`, `AircraftRegistration`, `IssuingState` (a
+  licence's or a device qualification's, as an ISO 3166-1 alpha-2 code),
+  `Licence` (with the titles of licence held under it: `IssuedTitle`, `LicenceTitle` and its categories,
   `AircraftCategory`), `Capacity` (the capacity a pilot serves in on a
   flight, in Annex 1's terms), `MinimumAges` (the minimum age for each title of
   licence, Annex 1's by default), `FstdKind`,
@@ -46,9 +48,10 @@ Known limits:
 
 - Values are checked for their form, not against the lists they come from. A
   type designator is checked for the shape of ICAO Doc 8643's designators, not
-  looked up in it; an issuing State is two capital letters, not checked
-  against ISO 3166-1; a waypoint's designator is not checked against any
-  State's published list.
+  looked up in it; a location indicator is four capital letters, not looked
+  up in ICAO Doc 7910 or checked against its regions; an issuing State is two
+  capital letters, not checked against ISO 3166-1; a waypoint's designator is
+  not checked against any State's published list.
 - The types serialise with serde, but that JSON is not a stored format that is
   promised: it may change between versions, as the API may.
 
@@ -83,7 +86,7 @@ or in `Cargo.toml`:
 
 ```toml
 [dependencies]
-icao-shared-kernel = "0.2.0"
+icao-shared-kernel = "0.3.0"
 ```
 
 To follow `main` instead, depend on it by git and pin a commit with `rev`,

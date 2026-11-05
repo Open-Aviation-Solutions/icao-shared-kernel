@@ -4,7 +4,9 @@
 
 //! Pilot and Licence construction and validation.
 
-use icao_shared_kernel::{IssuedTitle, Licence, LicenceTitle, Pilot, PrivateOrCommercialCategory};
+use icao_shared_kernel::{
+    IssuedTitle, IssuingState, Licence, LicenceTitle, Pilot, PrivateOrCommercialCategory,
+};
 use rstest::rstest;
 use serde_json::json;
 use time::macros::date;
@@ -15,7 +17,8 @@ const BORN: Date = date!(1990 - 06 - 15);
 
 #[test]
 fn pilot_creation() {
-    let licence = Licence::new("AU", "CASA", "12345", vec![]).unwrap();
+    let licence =
+        Licence::new(IssuingState::parse("AU").unwrap(), "CASA", "12345", vec![]).unwrap();
     let pilot = Pilot::with(Uuid::new_v4(), "John Smith", BORN, vec![licence.clone()]).unwrap();
     assert_eq!(pilot.full_name(), "John Smith");
     assert_eq!(pilot.date_of_birth(), BORN);
@@ -35,15 +38,20 @@ fn holds_multiple_state_licences() {
         "Amelia Earhart",
         BORN,
         vec![
-            Licence::new("AU", "CASA", "CASA-1", vec![]).unwrap(),
-            Licence::new("US", "FAA", "FAA-2", vec![]).unwrap(),
+            Licence::new(IssuingState::parse("AU").unwrap(), "CASA", "CASA-1", vec![]).unwrap(),
+            Licence::new(IssuingState::parse("US").unwrap(), "FAA", "FAA-2", vec![]).unwrap(),
         ],
     )
     .unwrap();
     let authorities: Vec<_> = pilot
         .licences()
         .iter()
-        .map(|licence| (licence.issuing_state(), licence.issuing_authority()))
+        .map(|licence| {
+            (
+                licence.issuing_state().as_str(),
+                licence.issuing_authority(),
+            )
+        })
         .collect();
     assert_eq!(authorities, [("AU", "CASA"), ("US", "FAA")]);
 }
@@ -72,7 +80,13 @@ fn the_full_name_is_trimmed() {
 #[test]
 fn licence_number_is_an_alphanumeric_string() {
     // EASA-style identifiers embed a country prefix and letters.
-    let licence = Licence::new("GB", "UK CAA", "UK.FCL.0A1B2", vec![]).unwrap();
+    let licence = Licence::new(
+        IssuingState::parse("GB").unwrap(),
+        "UK CAA",
+        "UK.FCL.0A1B2",
+        vec![],
+    )
+    .unwrap();
     assert_eq!(licence.number(), "UK.FCL.0A1B2");
 }
 
@@ -80,28 +94,21 @@ fn licence_number_is_an_alphanumeric_string() {
 fn licence_number_has_no_upper_length_bound() {
     // ICAO Annex 1 sets no maximum; only non-emptiness is enforced.
     let long_number = "1".repeat(200);
-    assert!(Licence::new("AU", "CASA", &long_number, vec![]).is_ok());
+    assert!(Licence::new(
+        IssuingState::parse("AU").unwrap(),
+        "CASA",
+        &long_number,
+        vec![]
+    )
+    .is_ok());
 }
 
 #[rstest]
-#[case("AU", "", "12345")] // empty authority
-#[case("AU", "CASA", "")] // empty number
-fn licence_validation_rejects_empty_fields(
-    #[case] state: &str,
-    #[case] authority: &str,
-    #[case] number: &str,
-) {
+#[case("", "12345")] // empty authority
+#[case("CASA", "")] // empty number
+fn licence_validation_rejects_empty_fields(#[case] authority: &str, #[case] number: &str) {
+    let state = IssuingState::parse("AU").unwrap();
     assert!(Licence::new(state, authority, number, vec![]).is_err());
-}
-
-#[rstest]
-#[case("australia")] // not a code
-#[case("aus")] // three letters
-#[case("A")] // one letter
-#[case("au")] // lowercase
-#[case("")] // empty
-fn licence_validation_rejects_bad_issuing_state(#[case] state: &str) {
-    assert!(Licence::new(state, "CASA", "12345", vec![]).is_err());
 }
 
 #[rstest]
@@ -116,7 +123,13 @@ fn pilot_validation_enforces_full_name_bounds(#[case] full_name: String) {
 // entries for it could give two dates for one title.
 fn private_aeroplane_from(issued: Date) -> Licence {
     let title = LicenceTitle::Private(PrivateOrCommercialCategory::Aeroplane);
-    Licence::new("AU", "CASA", "12345", vec![IssuedTitle::new(title, issued)]).unwrap()
+    Licence::new(
+        IssuingState::parse("AU").unwrap(),
+        "CASA",
+        "12345",
+        vec![IssuedTitle::new(title, issued)],
+    )
+    .unwrap()
 }
 
 #[test]

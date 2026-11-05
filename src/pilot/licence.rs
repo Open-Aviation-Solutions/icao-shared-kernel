@@ -8,7 +8,8 @@
 use serde::{Deserialize, Serialize};
 
 use super::licence_title::IssuedTitle;
-use crate::error::{check_issuing_state, check_non_empty, ValidationError};
+use crate::error::{check_non_empty, ValidationError};
+use crate::IssuingState;
 
 /// A pilot licence as its State numbers it (Annex 1, 5.2.1 I and III), and the
 /// titles of licence held under it, each from the date it was first issued.
@@ -42,26 +43,24 @@ use crate::error::{check_issuing_state, check_non_empty, ValidationError};
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(try_from = "LicenceData", into = "LicenceData")]
 pub struct Licence {
-    issuing_state: String,
+    issuing_state: IssuingState,
     issuing_authority: String,
     number: String,
     titles: Vec<IssuedTitle>,
 }
 
 impl Licence {
-    /// Build a licence, validating the issuing State is an ISO 3166-1 alpha-2
-    /// code, that the authority and number are non-empty, and that no title of
-    /// licence (with its category of aircraft) is listed twice.
+    /// Build a licence, validating that the authority and number are
+    /// non-empty, and that no title of licence (with its category of aircraft)
+    /// is listed twice.
     pub fn new(
-        issuing_state: impl Into<String>,
+        issuing_state: IssuingState,
         issuing_authority: impl Into<String>,
         number: impl Into<String>,
         mut titles: Vec<IssuedTitle>,
     ) -> Result<Self, ValidationError> {
-        let issuing_state = issuing_state.into();
         let issuing_authority = issuing_authority.into();
         let number = number.into();
-        check_issuing_state(&issuing_state)?;
         check_non_empty("issuing_authority", &issuing_authority)?;
         check_non_empty("number", &number)?;
         titles.sort_by_key(|issued| issued.title);
@@ -80,7 +79,7 @@ impl Licence {
     }
 
     /// The ISO 3166-1 alpha-2 code of the State that issued the licence.
-    pub fn issuing_state(&self) -> &str {
+    pub fn issuing_state(&self) -> &IssuingState {
         &self.issuing_state
     }
 
@@ -112,7 +111,7 @@ impl Licence {
 // a licence without the field is refused.
 #[derive(Serialize, Deserialize)]
 struct LicenceData {
-    issuing_state: String,
+    issuing_state: IssuingState,
     issuing_authority: String,
     number: String,
     titles: Vec<IssuedTitle>,

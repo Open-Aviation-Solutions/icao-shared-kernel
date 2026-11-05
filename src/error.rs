@@ -50,6 +50,11 @@ pub enum ValidationError {
     #[error("issuing_state '{0}' must be a two-letter ISO 3166-1 alpha-2 code")]
     IssuingState(String),
 
+    /// A location indicator that is not four uppercase letters, the shape of
+    /// ICAO Doc 7910's.
+    #[error("location indicator '{0}' must be four uppercase letters")]
+    LocationIndicator(String),
+
     /// A title of licence and a category of aircraft that Annex 1 does not
     /// issue together (Annex 1, 2.3.1, 2.4.1, 2.5, 2.6.3 to 2.6.5, 2.9 and
     /// 2.10). The licence is its name: without its category it is no value
@@ -139,17 +144,6 @@ pub(crate) fn check_length(
 pub(crate) fn check_non_empty(field: &'static str, value: &str) -> Result<(), ValidationError> {
     if value.is_empty() {
         return Err(ValidationError::Empty { field });
-    }
-    Ok(())
-}
-
-/// Validate an ISO 3166-1 alpha-2 code by shape: exactly two ASCII uppercase
-/// letters. Membership against the real code list is intentionally left for a
-/// later step — this checks form only.
-pub(crate) fn check_issuing_state(value: &str) -> Result<(), ValidationError> {
-    let is_alpha2 = value.len() == 2 && value.bytes().all(|b| b.is_ascii_uppercase());
-    if !is_alpha2 {
-        return Err(ValidationError::IssuingState(value.to_string()));
     }
     Ok(())
 }
