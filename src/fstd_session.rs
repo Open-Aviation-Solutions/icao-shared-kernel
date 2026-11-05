@@ -10,7 +10,6 @@ use time::UtcDateTime;
 use uuid::Uuid;
 
 use crate::aircraft::AircraftType;
-use crate::error::ValidationError;
 use crate::flight::flight_duration::FlightDuration;
 use crate::flight::flight_rules::FlightRules;
 use crate::flight::significant_point::SignificantPoint;
@@ -108,19 +107,6 @@ impl FstdSession {
             flight_rules,
             ..self
         }
-    }
-
-    /// Convenience constructor for a session with no route and no times
-    /// recorded, validating the simulated type designator.
-    pub fn create(device_id: Uuid, simulated_type: &str) -> Result<Self, ValidationError> {
-        Ok(Self::new(
-            device_id,
-            Some(AircraftType::parse(simulated_type)?),
-            None,
-            None,
-            None,
-            None,
-        ))
     }
 
     /// Canonical short route string, e.g. `YSBK-YSCN` — `Some` only when both
