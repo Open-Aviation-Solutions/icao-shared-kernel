@@ -5,6 +5,7 @@
 //! The `Flight` aggregate root — the Shared Kernel thin hub for the physical
 //! flight event — and its flight-scoped value objects.
 
+pub mod aerodrome;
 pub mod coordinate;
 pub mod flight_duration;
 pub mod flight_rules;
@@ -17,9 +18,9 @@ use time::UtcDateTime;
 use uuid::Uuid;
 
 use crate::error::ValidationError;
+use aerodrome::Aerodrome;
 use flight_duration::FlightDuration;
 use flight_rules::FlightRules;
-use significant_point::SignificantPoint;
 
 /// Shared record identifying a physical flight event.
 ///
@@ -49,7 +50,7 @@ use significant_point::SignificantPoint;
 /// being towed or not, until the moment it comes to rest at the end of the
 /// flight".
 ///
-/// Both are optional because the route (the departure and arrival points) is
+/// Both are optional because the route (the departure and arrival aerodromes) is
 /// often known before the times are.
 /// `flight_rules` is optional because a record may not say: it is never
 /// inferred from anything else. The constructors leave it unrecorded; set it
@@ -58,8 +59,8 @@ use significant_point::SignificantPoint;
 pub struct Flight {
     pub id: Uuid,
     pub aircraft_id: Uuid,
-    pub departure: SignificantPoint,
-    pub arrival: SignificantPoint,
+    pub departure: Aerodrome,
+    pub arrival: Aerodrome,
     /// The start of the flight, from which its duration is measured, if
     /// recorded.
     pub first_movement: Option<UtcDateTime>,
@@ -73,8 +74,8 @@ impl Flight {
     /// Build a flight from already-validated parts, assigning a fresh id.
     pub fn new(
         aircraft_id: Uuid,
-        departure: SignificantPoint,
-        arrival: SignificantPoint,
+        departure: Aerodrome,
+        arrival: Aerodrome,
         first_movement: Option<UtcDateTime>,
         last_movement: Option<UtcDateTime>,
     ) -> Self {
@@ -95,8 +96,8 @@ impl Flight {
     pub fn with(
         id: Uuid,
         aircraft_id: Uuid,
-        departure: SignificantPoint,
-        arrival: SignificantPoint,
+        departure: Aerodrome,
+        arrival: Aerodrome,
         first_movement: Option<UtcDateTime>,
         last_movement: Option<UtcDateTime>,
     ) -> Self {
@@ -119,8 +120,9 @@ impl Flight {
         }
     }
 
-    /// Convenience constructor from coded designator strings, validating them
-    /// and assigning a fresh id with no movement times recorded.
+    /// Convenience constructor from the departure and arrival aerodromes'
+    /// location indicators, validating them and assigning a fresh id with no
+    /// movement times recorded.
     pub fn create(
         aircraft_id: Uuid,
         departure: &str,
@@ -128,14 +130,16 @@ impl Flight {
     ) -> Result<Self, ValidationError> {
         Ok(Self::new(
             aircraft_id,
-            SignificantPoint::designator(departure)?,
-            SignificantPoint::designator(arrival)?,
+            Aerodrome::listed(departure)?,
+            Aerodrome::listed(arrival)?,
             None,
             None,
         ))
     }
 
-    /// Canonical short route string, e.g. `YSBK-YSCN`.
+    /// A short route string for showing, e.g. `YSBK-YSCN`: the departure
+    /// and the arrival joined by `-`. It is not to be split back into the
+    /// two, since an unlisted aerodrome's name or position may hold a `-`.
     pub fn route_summary(&self) -> String {
         format!("{}-{}", self.departure, self.arrival)
     }

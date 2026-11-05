@@ -46,6 +46,11 @@ pub enum ValidationError {
     #[error("{field} must not be empty")]
     Empty { field: &'static str },
 
+    /// A one-line text field holding a control character, such as a line
+    /// break.
+    #[error("{field} must not contain control characters")]
+    ControlCharacter { field: &'static str },
+
     /// An issuing state that is not a two-letter ISO 3166-1 alpha-2 code.
     #[error("issuing State '{0}' must be a two-letter ISO 3166-1 alpha-2 code")]
     IssuingState(String),
@@ -54,6 +59,20 @@ pub enum ValidationError {
     /// ICAO Doc 7910's.
     #[error("location indicator '{0}' must be four uppercase letters")]
     LocationIndicator(String),
+
+    /// An unlisted aerodrome with neither a name nor a position: Doc 4444,
+    /// Appendix 2, Item 18 (`DEP/`, `DEST/`) describes one by either.
+    #[error("an unlisted aerodrome must have a name or a position")]
+    UnlistedAerodrome,
+
+    /// `ZZZZ` given as a location indicator: ICAO Doc 4444's mark, in a
+    /// flight plan (Appendix 2, Items 13 and 16), for an aerodrome with no
+    /// location indicator, which Item 18 then describes.
+    #[error(
+        "'ZZZZ' means the aerodrome has no location indicator: describe it as \
+         an unlisted aerodrome instead, by its name or its position"
+    )]
+    NoLocationIndicator,
 
     /// A title of licence and a category of aircraft that Annex 1 does not
     /// issue together (Annex 1, 2.3.1, 2.4.1, 2.5, 2.6.3 to 2.6.5, 2.9 and
