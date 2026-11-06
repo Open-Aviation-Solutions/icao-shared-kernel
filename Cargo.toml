@@ -4,7 +4,7 @@
 
 [package]
 name = "icao-shared-kernel"
-version = "0.5.0"
+version = "0.5.1"
 edition = "2021"
 license = "MPL-2.0"
 description = "Value objects and aggregates for International Civil Aviation Organization concepts."
