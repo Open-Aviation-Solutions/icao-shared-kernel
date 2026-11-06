@@ -12,10 +12,11 @@ use serde::{Deserialize, Serialize};
 /// operation in Annex 6) is derived by [`is_3d`](Self::is_3d), not stored; how
 /// an authority counts it is that authority's reading.
 ///
-/// This is the procedure, not the operation flown: [`is_3d`](Self::is_3d) is
-/// the class of the procedure flown straight in to its own minima. An approach
-/// that ends in a circling manoeuvre to an MDA/H is a 2D operation whatever
-/// the procedure, and is not distinguished here.
+/// This is the procedure, not whether the approach ended in a circling
+/// manoeuvre, which is not recorded here. Annex 6 Part I names a "circling
+/// approach operation" beside a 2D one (in its definition of minimum descent
+/// altitude or height) and does not class a circled approach as 2D, so
+/// [`is_3d`](Self::is_3d) is the class of the procedure flown, circled or not.
 ///
 /// A procedure particular to one State (an Australian DME or GNSS arrival, say)
 /// is recorded in that authority's section, not here. There is no `Mls` value
@@ -68,10 +69,10 @@ pub enum RnpApchMinima {
 }
 
 impl ApproachType {
-    /// Whether this procedure, flown straight in to its own minima, is a 3D
-    /// approach operation (lateral and vertical guidance, Annex 6), as against
-    /// a 2D one (lateral guidance only). A circling approach is not
-    /// distinguished.
+    /// Whether this procedure is a 3D approach operation (lateral and
+    /// vertical guidance, Annex 6), as against a 2D one (lateral guidance
+    /// only). Whether the approach ended in a circling manoeuvre does not
+    /// change it.
     pub fn is_3d(self) -> bool {
         match self {
             Self::Ndb | Self::Vor | Self::Localizer => false,
