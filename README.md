@@ -37,7 +37,7 @@ What is covered:
   `Licence` (with the titles of licence held under it: `IssuedTitle`, `LicenceTitle` and its categories,
   `AircraftCategory`), `Capacity` (the capacity a pilot serves in on a
   flight, in Annex 1's terms), `MinimumAges` (the minimum age for each title of
-  licence, Annex 1's by default), `FstdKind`,
+  licence, Annex 1's by default) and `age_on` (whole years completed on a date), `FstdKind`,
   `DeviceDesignation` and `DeviceQualification`.
 - Aggregates: `Flight`, `Aircraft`, `Pilot`, `FlightSimulationTrainingDevice`
   and `FstdSession`.

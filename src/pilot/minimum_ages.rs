@@ -14,9 +14,10 @@ use super::licence_title::LicenceTitle;
 /// [`Default`] is Annex 1's: the applicant "shall be not less than" the age
 /// for the licence (2.3.1.1, 2.4.1.1, 2.5.1.1, 2.6.1.1, 2.9.1.1 and 2.10.1.1).
 /// The age is the licence's, whatever its category: an airline transport pilot
-/// licence for helicopters has the same minimum as one for aeroplanes. A State
+/// licence for helicopters has the same minimum as one for aeroplanes. An authority
 /// whose ages differ from Annex 1's supplies its own table, changing only the
-/// fields that differ:
+/// fields that differ (see [`Pilot::with_minimum_ages`](crate::Pilot::with_minimum_ages)
+/// for giving each authority its own):
 ///
 /// ```
 /// use icao_shared_kernel::MinimumAges;
@@ -60,9 +61,10 @@ impl Default for MinimumAges {
 }
 
 impl MinimumAges {
+    /// The minimum age for a title of licence, whatever its category.
     // Exhaustive on the title, so that a new title does not compile until it
     // has an age.
-    pub(crate) fn for_title(&self, title: LicenceTitle) -> u8 {
+    pub fn for_title(&self, title: LicenceTitle) -> u8 {
         match title {
             LicenceTitle::Private(_) => self.private,
             LicenceTitle::Commercial(_) => self.commercial,
@@ -81,7 +83,7 @@ impl MinimumAges {
 /// birthday, compared by month and day: someone born on 29 February completes
 /// a year on 1 March in a year that is not a leap year, so is never treated as
 /// older than they are.
-pub(crate) fn age_on(born: Date, on: Date) -> i32 {
+pub fn age_on(born: Date, on: Date) -> i32 {
     let years = on.year() - born.year();
     if (u8::from(on.month()), on.day()) < (u8::from(born.month()), born.day()) {
         years - 1
