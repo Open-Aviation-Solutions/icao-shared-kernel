@@ -6,8 +6,8 @@
 //! 2.5.1.1, 2.6.1.1, 2.9.1.1 and 2.10.1.1), and a State's own in its place.
 
 use icao_shared_kernel::{
-    AirlineTransportCategory, IssuedTitle, IssuingState, Licence, LicenceTitle, MinimumAges, Pilot,
-    PrivateOrCommercialCategory, ValidationError,
+    age_on, AirlineTransportCategory, IssuedTitle, IssuingState, Licence, LicenceTitle,
+    MinimumAges, Pilot, PrivateOrCommercialCategory, ValidationError,
 };
 use rstest::rstest;
 use serde_json::json;
@@ -142,7 +142,8 @@ fn a_lower_age_accepts_what_annex_1_refuses() {
     assert!(pilot(BORN, private_aeroplane(), issued).is_err());
     let licences = vec![licence(private_aeroplane(), issued)];
     assert!(
-        Pilot::with_minimum_ages(Uuid::new_v4(), "Jane Citizen", BORN, licences, &LOWER).is_ok()
+        Pilot::with_minimum_ages(Uuid::new_v4(), "Jane Citizen", BORN, licences, |_, _| LOWER)
+            .is_ok()
     );
 }
 
@@ -150,7 +151,7 @@ fn a_lower_age_accepts_what_annex_1_refuses() {
 fn a_lower_age_reads_what_annex_1_refuses() {
     let json = wire(BORN, private_aeroplane(), date!(2016 - 06 - 15));
     assert!(serde_json::from_value::<Pilot>(json.clone()).is_err());
-    assert!(Pilot::deserialize_with(json, &LOWER).is_ok());
+    assert!(Pilot::deserialize_with(json, |_, _| LOWER).is_ok());
 }
 
 #[test]
@@ -163,8 +164,9 @@ fn a_higher_age_refuses_what_annex_1_accepts() {
     let issued = date!(2018 - 06 - 15);
     assert!(pilot(BORN, title, issued).is_ok());
     let licences = vec![licence(title, issued)];
-    let error = Pilot::with_minimum_ages(Uuid::new_v4(), "Jane Citizen", BORN, licences, &ages)
-        .unwrap_err();
+    let error =
+        Pilot::with_minimum_ages(Uuid::new_v4(), "Jane Citizen", BORN, licences, |_, _| ages)
+            .unwrap_err();
     assert!(matches!(
         error,
         ValidationError::UnderMinimumAge {
@@ -172,10 +174,71 @@ fn a_higher_age_refuses_what_annex_1_accepts() {
             ..
         }
     ));
-    let read = Pilot::deserialize_with(wire(BORN, title, issued), &ages).unwrap_err();
+    let read = Pilot::deserialize_with(wire(BORN, title, issued), |_, _| ages).unwrap_err();
     assert_eq!(
         read.to_string(),
         "commercial pilot licence (aeroplane) under licence 12345 (CASA, AU) was first issued \
          on 2018-06-15, before the holder was 19"
     );
+}
+
+fn licence_from(authority: &str, number: &str, title: LicenceTitle, issued: Date) -> Licence {
+    Licence::new(
+        IssuingState::parse("AU").unwrap(),
+        authority,
+        number,
+        vec![IssuedTitle::new(title, issued)],
+    )
+    .unwrap()
+}
+
+// Only the authority "LOW" has the lower private pilot age.
+fn ages_of(_: &IssuingState, authority: &str) -> MinimumAges {
+    if authority == "LOW" {
+        LOWER
+    } else {
+        MinimumAges::default()
+    }
+}
+
+#[test]
+fn each_licence_is_checked_against_its_own_authoritys_ages() {
+    let issued = date!(2016 - 06 - 15);
+    let low = licence_from("LOW", "1", private_aeroplane(), issued);
+    let other = licence_from("OTHER", "2", private_aeroplane(), issued);
+
+    assert!(Pilot::with_minimum_ages(
+        Uuid::new_v4(),
+        "Jane Citizen",
+        BORN,
+        vec![low.clone()],
+        ages_of
+    )
+    .is_ok());
+    let error = Pilot::with_minimum_ages(
+        Uuid::new_v4(),
+        "Jane Citizen",
+        BORN,
+        vec![low, other],
+        ages_of,
+    )
+    .unwrap_err();
+    assert!(matches!(
+        error,
+        ValidationError::UnderMinimumAge { ref number, minimum_age: 17, .. } if number == "2"
+    ));
+}
+
+#[test]
+fn age_on_counts_whole_years_completed() {
+    assert_eq!(age_on(BORN, date!(2017 - 06 - 14)), 16);
+    assert_eq!(age_on(BORN, date!(2017 - 06 - 15)), 17);
+    assert_eq!(age_on(BORN, date!(2000 - 01 - 01)), -1);
+}
+
+#[test]
+fn for_title_gives_the_age_of_the_title_whatever_its_category() {
+    let ages = MinimumAges::default();
+    assert_eq!(ages.for_title(private_aeroplane()), 17);
+    assert_eq!(ages.for_title(LicenceTitle::MultiCrew), 18);
 }
