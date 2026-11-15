@@ -43,13 +43,15 @@ use crate::IssuingState;
 /// ages differ builds with [`Pilot::with_minimum_ages`] and reads with
 /// [`Pilot::deserialize_with`], passing a function from a licence's issuing
 /// State and authority to the ages for the titles it issued, so that each
-/// licence is checked against its own authority's. Read with plain `Deserialize`, a pilot of a State
-/// whose age is below Annex 1's is refused, which is seen at once; one of a
-/// State whose age is above Annex 1's is accepted when the State's own age
-/// would refuse them, which is not. A pilot does not keep the table it was
-/// checked against: one built with a State's lower ages serialises to JSON
-/// that plain `Deserialize` refuses, and a type that embeds a `Pilot` with
-/// derived `Deserialize` checks it against Annex 1's ages.
+/// licence is checked against its own authority's. The function is called
+/// once for each licence. A pilot does not keep the ages it was checked
+/// against: read with plain `Deserialize`, one whose licence's authority has
+/// ages below Annex 1's is refused, which is seen at once; one whose
+/// authority's ages are above Annex 1's is accepted when the authority's own
+/// would refuse them, which is not. A pilot built with an authority's lower
+/// ages serialises to JSON that plain `Deserialize` refuses, and a type that
+/// embeds a `Pilot` with derived `Deserialize` checks it against Annex 1's
+/// ages.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(try_from = "PilotData", into = "PilotData")]
 pub struct Pilot {
@@ -101,7 +103,7 @@ impl Pilot {
         full_name: impl Into<String>,
         date_of_birth: Date,
         licences: Vec<Licence>,
-        minimum_ages: impl Fn(&IssuingState, &str) -> MinimumAges,
+        mut minimum_ages: impl FnMut(&IssuingState, &str) -> MinimumAges,
     ) -> Result<Self, ValidationError> {
         let full_name = full_name.into().trim().to_owned();
         check_length("full_name", &full_name, 1, 100)?;
@@ -121,10 +123,9 @@ impl Pilot {
             });
         }
         for licence in &licences {
+            let ages = minimum_ages(licence.issuing_state(), licence.issuing_authority());
             for issued in licence.titles() {
-                let minimum_age =
-                    minimum_ages(licence.issuing_state(), licence.issuing_authority())
-                        .for_title(issued.title);
+                let minimum_age = ages.for_title(issued.title);
                 let age = age_on(date_of_birth, issued.date_of_first_issue);
                 if age < i32::from(minimum_age) {
                     return Err(ValidationError::UnderMinimumAge {
@@ -188,7 +189,7 @@ impl Pilot {
     /// ```
     pub fn deserialize_with<'de, D: Deserializer<'de>>(
         deserializer: D,
-        minimum_ages: impl Fn(&IssuingState, &str) -> MinimumAges,
+        minimum_ages: impl FnMut(&IssuingState, &str) -> MinimumAges,
     ) -> Result<Self, D::Error> {
         PilotData::deserialize(deserializer)?
             .into_pilot(minimum_ages)
@@ -214,7 +215,7 @@ struct PilotData {
 impl PilotData {
     fn into_pilot(
         self,
-        minimum_ages: impl Fn(&IssuingState, &str) -> MinimumAges,
+        minimum_ages: impl FnMut(&IssuingState, &str) -> MinimumAges,
     ) -> Result<Pilot, ValidationError> {
         Pilot::with_minimum_ages(
             self.id,

@@ -3,7 +3,8 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 //! The minimum age for each title of licence (Annex 1, 2.3.1.1, 2.4.1.1,
-//! 2.5.1.1, 2.6.1.1, 2.9.1.1 and 2.10.1.1), and a State's own in its place.
+//! 2.5.1.1, 2.6.1.1, 2.9.1.1 and 2.10.1.1), and each licence's authority's own
+//! in its place.
 
 use icao_shared_kernel::{
     age_on, AirlineTransportCategory, IssuedTitle, IssuingState, Licence, LicenceTitle,
@@ -125,7 +126,7 @@ fn plain_deserialize_refuses_a_title_below_annex_1_age() {
     );
 }
 
-// A State whose private pilot licence age is lower than Annex 1's, and every
+// An authority whose private pilot licence age is lower than Annex 1's, and every
 // other age Annex 1's.
 const LOWER: MinimumAges = MinimumAges {
     private: 16,
@@ -234,11 +235,8 @@ fn age_on_counts_whole_years_completed() {
     assert_eq!(age_on(BORN, date!(2017 - 06 - 14)), 16);
     assert_eq!(age_on(BORN, date!(2017 - 06 - 15)), 17);
     assert_eq!(age_on(BORN, date!(2000 - 01 - 01)), -1);
-}
-
-#[test]
-fn for_title_gives_the_age_of_the_title_whatever_its_category() {
-    let ages = MinimumAges::default();
-    assert_eq!(ages.for_title(private_aeroplane()), 17);
-    assert_eq!(ages.for_title(LicenceTitle::MultiCrew), 18);
+    // Born on 29 February: a year is complete on 1 March in a common year.
+    let leap = date!(2004 - 02 - 29);
+    assert_eq!(age_on(leap, date!(2021 - 02 - 28)), 16);
+    assert_eq!(age_on(leap, date!(2021 - 03 - 01)), 17);
 }
