@@ -7,7 +7,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use super::licence_title::IssuedTitle;
+use super::licence_title::{IssuedTitle, LicenceTitle};
 use crate::error::{check_non_empty, ValidationError};
 use crate::IssuingState;
 
@@ -35,6 +35,7 @@ use crate::IssuingState;
 /// aircraft endorsed on the original (2.1.1.2.1 b)). Each title is one licence
 /// (5.2.1 II, with its category under 2.1.1.2), so the same title listed twice
 /// is refused: it would carry two dates for one licence. The titles are kept
+/// in order of their date of first issue, those first issued on the same day
 /// in `LicenceTitle`'s order, not as given, so that equality does not depend
 /// on the order they were listed in. The list may be empty: a State's licence
 /// can hold only national licences that are not Annex 1's (CASA's recreational
@@ -63,13 +64,15 @@ impl Licence {
         let number = number.into();
         check_non_empty("issuing_authority", &issuing_authority)?;
         check_non_empty("number", &number)?;
-        titles.sort_by_key(|issued| issued.title);
-        if let Some(pair) = titles
-            .windows(2)
-            .find(|pair| pair[0].title == pair[1].title)
-        {
-            return Err(ValidationError::RepeatedLicenceTitle(pair[0].title));
+        // A title listed twice is found on a copy sorted by title, since the
+        // order the titles are kept in puts the same title's entries apart
+        // when they were first issued on different dates.
+        let mut by_title: Vec<LicenceTitle> = titles.iter().map(|issued| issued.title).collect();
+        by_title.sort();
+        if let Some(pair) = by_title.windows(2).find(|pair| pair[0] == pair[1]) {
+            return Err(ValidationError::RepeatedLicenceTitle(pair[0]));
         }
+        titles.sort_by_key(|issued| (issued.date_of_first_issue, issued.title));
         Ok(Self {
             issuing_state,
             issuing_authority,
@@ -93,9 +96,10 @@ impl Licence {
         &self.number
     }
 
-    /// The titles of licence held under this licence, in `LicenceTitle`'s
-    /// order: the order they were given in means nothing, so it is not kept,
-    /// and two licences holding the same titles are equal however listed.
+    /// The titles of licence held under this licence, in order of
+    /// their date of first issue, those first issued on the same day in
+    /// `LicenceTitle`'s order: the order they were given in means nothing, so
+    /// it is not kept, and two licences holding the same titles are equal however listed.
     pub fn titles(&self) -> &[IssuedTitle] {
         &self.titles
     }
