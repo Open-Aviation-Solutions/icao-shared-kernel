@@ -170,3 +170,48 @@ fn the_order_titles_are_listed_in_does_not_matter() {
         licence(vec![glider, private])
     );
 }
+
+#[test]
+fn titles_are_kept_in_order_of_first_issue_then_title() {
+    // A commercial helicopter licence (listed after the private aeroplane one
+    // in `LicenceTitle`'s order) first issued earlier comes first; the glider
+    // and the private aeroplane licence, first issued on the same day, follow
+    // in `LicenceTitle`'s order.
+    let commercial_helicopter = IssuedTitle::new(
+        LicenceTitle::Commercial(PrivateOrCommercialCategory::Helicopter),
+        date!(2010 - 01 - 01),
+    );
+    let private = IssuedTitle::new(private_aeroplane(), date!(2015 - 04 - 01));
+    let glider = IssuedTitle::new(LicenceTitle::Glider, date!(2015 - 04 - 01));
+    let licence = Licence::new(
+        IssuingState::parse("AU").unwrap(),
+        "CASA",
+        "12345",
+        vec![
+            glider.clone(),
+            private.clone(),
+            commercial_helicopter.clone(),
+        ],
+    )
+    .unwrap();
+    assert_eq!(licence.titles(), [commercial_helicopter, private, glider]);
+}
+
+#[test]
+fn a_title_listed_twice_is_refused_whatever_lies_between() {
+    let error = Licence::new(
+        IssuingState::parse("AU").unwrap(),
+        "CASA",
+        "12345",
+        vec![
+            IssuedTitle::new(private_aeroplane(), date!(2010 - 01 - 01)),
+            IssuedTitle::new(LicenceTitle::Glider, date!(2012 - 01 - 01)),
+            IssuedTitle::new(private_aeroplane(), date!(2015 - 04 - 01)),
+        ],
+    )
+    .unwrap_err();
+    assert_eq!(
+        error,
+        ValidationError::RepeatedLicenceTitle(private_aeroplane())
+    );
+}
